@@ -1,0 +1,90 @@
+@startuml Domain Structure (Refined)
+!theme plain
+skinparam packageStyle rectangle
+
+package "Application Layer" {
+  class CreateLeadHandler {
+    +execute(title, contactId)
+  }
+  class ConvertLeadToDealHandler {
+    +execute(leadId, amount)
+  }
+  class LeadQueryHandler {
+    +findById(id)
+    +findAll()
+  }
+
+  CreateLeadHandler --> LeadRepository : uses
+  CreateLeadHandler --> ContactRepository : validates contact
+  ConvertLeadToDealHandler --> LeadRepository : reads
+  ConvertLeadToDealHandler --> DealRepository : creates
+}
+
+package "Domain Layer" {
+
+  package "Lead" #E8F5E9 {
+    class Lead {
+      -id: int
+      -title: string
+      -contactId: int
+      -status: string
+      +markAsQualified()
+      +markAsConverted()
+    }
+
+    interface LeadRepository {
+      +save(Lead)
+      +findByStatus(string)
+    }
+  }
+
+  package "Contact" #E3F2FD {
+    class Contact {
+      -id: int
+      -firstName: string
+      -lastName: string
+      -email: Email
+      +getFullName()
+    }
+
+    interface ContactRepository {
+      +save(Contact)
+      +findByEmail(string)
+    }
+
+    class Email <<ValueObject>> {
+      -value: string
+      +equals(Email)
+    }
+  }
+
+  package "Deal" #FFF9C4 {
+    class Deal {
+      -id: int
+      -title: string
+      -amount: Money
+      -contactId: int
+    }
+
+    interface DealRepository {
+      +save(Deal)
+    }
+
+    class Money <<ValueObject>> {
+      -amount: int
+      -currency: string
+    }
+  }
+}
+
+Lead --> "contactId" Contact : references by ID
+Deal --> "contactId" Contact : references by ID
+Contact *-- Email : contains
+Deal *-- Money : contains
+
+note bottom of Email
+Value Objects are immutable
+and defined by their value
+end note
+
+@enduml

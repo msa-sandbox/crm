@@ -1,0 +1,47 @@
+@startuml Authentication Flow
+!theme plain
+skinparam sequenceMessageAlign center
+
+actor Client
+participant "CRM API" as API
+participant "JWT Validator" as JWT
+participant "Redis Cache" as Redis
+participant "Auth Service" as Auth
+queue "Kafka" as Kafka
+
+== Initial Authentication ==
+Client -> Auth: POST /auth/api/login\n(credentials)
+Auth --> Auth: Validate credentials
+Auth -> Auth: Generate JWT token\n(24h TTL)
+Auth --> Client: access_token
+
+== API Request with Token ==
+Client -> API: GET /api/v1/leads\nAuthorization: Bearer <token>
+API -> JWT: Validate token
+JWT -> JWT: 1. Verify signature\n(public key)
+JWT -> JWT: 2. Check expiration
+JWT -> Redis: 3. Check invalidation\nGET token_invalidation:user:123
+Redis --> JWT: timestamp or NULL
+
+alt Token is valid
+  JWT --> API: Token valid
+  API --> API: Process request
+  API --> Client: 200 OK + data
+else Token invalidated
+  JWT --> API: TokenInvalidatedException
+  API --> Client: 401 Unauthorized\n{"should_refresh": true}
+  Client -> Auth: POST /auth/refresh
+  Auth --> Client: New access_token
+  Client -> API: Retry with new token
+end
+
+== Token Invalidation via Kafka ==
+Auth -> Kafka: Publish event:\nuser.permissions.changed
+Kafka -> API: Consume event
+API -> Redis: SET token_invalidation:user:123\ntimestamp, TTL=24h
+note right
+  All tokens issued before
+  this timestamp are invalid
+end note
+
+@enduml

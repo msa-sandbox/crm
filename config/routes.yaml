@@ -1,0 +1,13 @@
+# General controllers (health, metrics)
+controllers:
+  resource:
+    path: ../src/Controller/
+    namespace: App\Controller
+  type: attribute
+
+#
+api_v1:
+  resource: ../src/Api/V1/Controller/
+  type: attribute
+  prefix: /api/v1
+

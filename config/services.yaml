@@ -1,0 +1,42 @@
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+
+services:
+  _defaults:
+    autowire: true      # Automatically injects dependencies in your services.
+    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+  # makes classes in src/ available to be used as services
+  # this creates a service per class whose id is the fully-qualified class name
+  App\:
+    resource: '../src/'
+    exclude:
+    #  - '../src/Entity/'
+    #  - '../src/Http/Dto/*'
+
+  # Controllers must be public
+  App\Http\Controller\:
+    resource: '../src/Api/V1/Controller/*'
+    tags: ['controller.service_arguments']
+    public: true
+
+  # Set a couple Kernel listeners
+  App\Http\EventListener\ExceptionListener:
+    tags:
+      - { name: kernel.event_listener, event: kernel.exception }
+
+  App\Http\EventListener\ResponseListener:
+    tags:
+      - { name: kernel.event_listener, event: kernel.view }
+
+  # Kafka
+#  App\Infrastructure\Kafka\KafkaProducer:
+#    arguments:
+#      $brokers: '%env(KAFKA_BROKERS)%'
+#      $topicName: '%env(KAFKA_TOPIC)%'
+#  App\Command\KafkaConsumeCommand:
+#    arguments:
+#      $brokers: '%env(KAFKA_BROKERS)%'
+#      $topicName: '%env(KAFKA_TOPIC)%'
+#    tags: [ 'console.command' ]

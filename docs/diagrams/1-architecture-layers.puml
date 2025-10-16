@@ -1,0 +1,62 @@
+@startuml Architecture Layers
+!theme plain
+skinparam packageStyle rectangle
+skinparam linetype ortho
+
+package "Presentation Layer" as presentation #E8F5E9 {
+  [API v1\nControllers] as v1
+  [API v2\nControllers] as v2
+  [CLI Commands] as cli
+}
+
+package "Application Layer" as application #E3F2FD {
+  [Use Case\nServices] as services
+  [DTOs] as dto
+  [Transformers] as transformers
+}
+
+package "Domain Layer" as domain #FFF9C4 {
+  package "CRM" {
+    [Lead Domain] as lead
+    [Contact Domain] as contact
+    [Deal Domain] as deal
+  }
+}
+
+package "Infrastructure Layer" as infrastructure #FFEBEE {
+  [Doctrine ORM] as doctrine
+  [Kafka Consumer] as kafka
+  [Redis Cache] as redis
+  [Auth Service\nClient] as auth
+}
+
+v1 -down-> services
+v2 -down-> services
+cli -down-> services
+
+services -down-> lead
+services -down-> contact
+services -down-> deal
+
+services --> transformers
+transformers --> dto
+
+lead -down-> doctrine
+contact -down-> doctrine
+deal -down-> doctrine
+
+services -down-> kafka
+services -down-> redis
+services -down-> auth
+
+note right of domain
+  Pure business logic
+  No framework dependencies
+end note
+
+note right of infrastructure
+  External integrations
+  Database, Cache, Events
+end note
+
+@enduml

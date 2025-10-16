@@ -1,0 +1,78 @@
+@startuml API Request Flow
+!theme plain
+
+actor Client
+participant "API v1\nController" as Controller
+participant "Rate Limiter" as RateLimit
+participant "Use Case\nService" as Service
+participant "Domain\nEntity" as Entity
+participant "Repository" as Repo
+participant "Transformer" as Trans
+database "PostgreSQL" as DB
+
+== POST /api/v1/leads ==
+Client -> Controller: POST /api/v1/leads\n{"title": "...", "contactId": 5}
+activate Controller
+
+Controller -> RateLimit: Check rate limit
+RateLimit --> Controller: OK (847/1000 remaining)
+
+Controller -> Controller: Validate\nCreateLeadRequest DTO
+
+Controller -> Service: CreateLeadService.create(title, contactId)
+activate Service
+
+Service -> Service: Check contact exists
+Service -> Entity: new Lead(title, contactId)
+activate Entity
+Entity --> Service: Lead instance
+deactivate Entity
+
+Service -> Repo: save(lead)
+activate Repo
+Repo -> DB: INSERT INTO leads
+DB --> Repo:
+deactivate Repo
+
+Service -> Service: Dispatch\nLeadCreatedEvent
+Service --> Controller: Lead entity
+deactivate Service
+
+Controller -> Trans: LeadTransformer.transform(lead)
+activate Trans
+Trans --> Controller: LeadResponse DTO
+deactivate Trans
+
+Controller --> Client: 201 Created\n{"id": 123, "title": "..."}
+deactivate Controller
+
+== GET /api/v1/leads ==
+Client -> Controller: GET /api/v1/leads
+activate Controller
+
+Controller -> RateLimit: Check rate limit
+RateLimit --> Controller: OK
+
+Controller -> Service: LeadQueryService.findAll()
+activate Service
+
+Service -> Repo: findAll()
+activate Repo
+Repo -> DB: SELECT * FROM leads
+DB --> Repo: Lead entities
+Repo --> Service: Lead entities
+deactivate Repo
+
+Service -> Service: For each lead,\nload contact by ID
+Service --> Controller: [Lead] entities
+deactivate Service
+
+Controller -> Trans: transform collection
+activate Trans
+Trans --> Controller: [LeadResponse] DTOs
+deactivate Trans
+
+Controller --> Client: 200 OK\n[{"id": 123, ...}]
+deactivate Controller
+
+@enduml
