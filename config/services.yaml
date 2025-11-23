@@ -20,6 +20,10 @@ services:
     resource: '../src/Api/V1/Controller/*'
     tags: ['controller.service_arguments']
     public: true
+  App\Api\Controller\:
+    resource: '../src/Api/Controller/*'
+    tags: [ 'controller.service_arguments' ]
+    public: true
 
   # Set a couple Kernel listeners
   App\Api\V1\EventListener\ExceptionListener:
@@ -31,6 +35,10 @@ services:
       - { name: kernel.event_listener, event: kernel.view }
 
   # Kafka
+  App\Api\Controller\HealthController:
+    public: true
+    arguments:
+      $brokers: '%env(KAFKA_BROKERS)%'
 #  App\Infrastructure\Kafka\KafkaProducer:
 #    arguments:
 #      $brokers: '%env(KAFKA_BROKERS)%'
