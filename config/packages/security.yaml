@@ -1,29 +1,10 @@
 security:
-  # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
-  password_hashers:
-    Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
-  # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
-  providers:
-    app_user_provider:
-      entity:
-        class: App\Entity\User
-        property: email
-
   firewalls:
     api:
-      pattern: ^/api/
+      pattern: ^/api/v1/
       stateless: true
-#    web:
-#      pattern: ^/web/
-#      stateless: true
-#      provider: app_user_provider
-#      custom_authenticators:
-#        - App\Security\JwtAuthenticator
-#  access_control:
-#  role_hierarchy:
-#    ROLE_ADMIN: [ ROLE_WEB_USER, ROLE_API_USER ]
-#    ROLE_WEB_USER: [ ROLE_USER ]
-#    ROLE_API_USER: [ ROLE_USER ]
+      custom_authenticators:
+        - App\Security\JwtAuthenticator
 
 when@test:
   security:
