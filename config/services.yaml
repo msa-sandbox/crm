@@ -16,17 +16,17 @@ services:
     #  - '../src/Http/Dto/*'
 
   # Controllers must be public
-  App\Http\Controller\:
+  App\Api\V1\Controller\:
     resource: '../src/Api/V1/Controller/*'
     tags: ['controller.service_arguments']
     public: true
 
   # Set a couple Kernel listeners
-  App\Http\EventListener\ExceptionListener:
+  App\Api\V1\EventListener\ExceptionListener:
     tags:
       - { name: kernel.event_listener, event: kernel.exception }
 
-  App\Http\EventListener\ResponseListener:
+  App\Api\V1\EventListener\ResponseListener:
     tags:
       - { name: kernel.event_listener, event: kernel.view }
 
