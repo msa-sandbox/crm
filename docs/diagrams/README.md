@@ -31,12 +31,6 @@ Sequence diagram showing the complete flow:
 - GET request (list leads)
 - Rate limiting, validation, service calls, database access
 
-### 5. API Versioning (`api-versioning.puml`)
-Demonstrates how API versioning works:
-- Multiple API versions (v1, v2)
-- Different DTOs and transformers per version
-- Shared domain layer
-
 ## Viewing Diagrams
 
 ### Online Viewers
@@ -45,12 +39,10 @@ Demonstrates how API versioning works:
 
 ### IDE Plugins
 - **PhpStorm/IntelliJ**: [PlantUML Integration](https://plugins.jetbrains.com/plugin/7017-plantuml-integration)
-- **VS Code**: [PlantUML Extension](https://marketplace.visualstudio.com/items?itemName=jebbs.plantuml)
 
 ### Command Line
 ```bash
 # Install PlantUML
-brew install plantuml  # macOS
 apt install plantuml   # Ubuntu/Debian
 
 # Generate PNG
