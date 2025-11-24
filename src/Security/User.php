@@ -15,20 +15,25 @@ readonly class User implements UserInterface
     public function __construct(
         private int $id,
         private string $username,
+        private int $tokenIssuedAt,
         private array $permissions,
-    )
-    {}
+    ) {
+    }
 
     public function getId(): int
     {
         return $this->id;
     }
 
+    public function getTokenIssuedAt(): int
+    {
+        return $this->tokenIssuedAt;
+    }
+
     public function getPermissions(): array
     {
         return $this->permissions;
     }
-
 
     /**
      * We are not using roles, only permissions.
@@ -42,7 +47,6 @@ readonly class User implements UserInterface
 
     public function eraseCredentials(): void
     {
-        //
     }
 
     public function getUserIdentifier(): string

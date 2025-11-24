@@ -37,7 +37,7 @@ class ContactRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find contact by ID, excluding deleted
+     * Find contact by ID, excluding deleted.
      */
     public function findActiveById(int $id): ?Contact
     {
@@ -51,7 +51,7 @@ class ContactRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find contacts by user ID
+     * Find contacts by user ID.
      *
      * @return Contact[]
      */

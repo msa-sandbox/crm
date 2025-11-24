@@ -7,13 +7,13 @@ services:
     autowire: true      # Automatically injects dependencies in your services.
     autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
-  # makes classes in src/ available to be used as services
-  # this creates a service per class whose id is the fully-qualified class name
   App\:
     resource: '../src/'
     exclude:
-    #  - '../src/Entity/'
-    #  - '../src/Http/Dto/*'
+      - '../src/Api/V1/Dto/**'
+      - '../src/**/Entity/*'
+      - '../src/**/Entity/*'
+      - '../src/**/ValueObject/*'
 
   # Controllers must be public
   App\Api\V1\Controller\:
@@ -25,14 +25,12 @@ services:
     tags: [ 'controller.service_arguments' ]
     public: true
 
-  # Set a couple Kernel listeners
-  App\Api\V1\EventListener\ExceptionListener:
-    tags:
-      - { name: kernel.event_listener, event: kernel.exception }
+  # PSR-16 cache wrappers for our custom cache pools
+  App\Cache\AppCache:
+    class: Symfony\Component\Cache\Psr16Cache
+  App\Cache\AuthCache:
+    class: Symfony\Component\Cache\Psr16Cache
 
-  App\Api\V1\EventListener\ResponseListener:
-    tags:
-      - { name: kernel.event_listener, event: kernel.view }
 
   # Kafka
   App\Api\Controller\HealthController:

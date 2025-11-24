@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Api\V1\EventListener;
 
 use App\Api\V1\Response\ApiResponse;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\ViewEvent;
 
+#[AsEventListener(event: 'kernel.view')]
 final class ResponseListener
 {
     public function onKernelView(ViewEvent $event): void

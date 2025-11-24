@@ -41,7 +41,7 @@ class PhoneNumber
         // Simple formatting for display
         $value = $this->value;
 
-        if (strlen($value) === 11 && str_starts_with($value, '7')) {
+        if (11 === strlen($value) && str_starts_with($value, '7')) {
             // Russian format: +7 (XXX) XXX-XX-XX
             return sprintf(
                 '+7 (%s) %s-%s-%s',

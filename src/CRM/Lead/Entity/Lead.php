@@ -242,14 +242,12 @@ class Lead
             $this->contacts->add($contact);
         }
 
-
         return $this;
     }
 
     public function removeContact(Contact $contact): self
     {
         $this->contacts->removeElement($contact);
-
 
         return $this;
     }
@@ -263,17 +261,16 @@ class Lead
     {
         $this->contacts->clear();
 
-
         return $this;
     }
 
     /**
-     * Get array of contact IDs
+     * Get array of contact IDs.
      *
      * @return int[]
      */
     public function getContactIds(): array
     {
-        return $this->contacts->map(fn(Contact $contact) => $contact->getId())->toArray();
+        return $this->contacts->map(fn (Contact $contact) => $contact->getId())->toArray();
     }
 }

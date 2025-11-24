@@ -62,10 +62,11 @@ class JwtAuthenticator extends AbstractAuthenticator
         }
 
         return new SelfValidatingPassport(
-            new UserBadge($data['username'], function() use ($data) {
+            new UserBadge($data['username'], function () use ($data) {
                 return new User(
                     $data['user_id'],
                     $data['username'],
+                    $data['iat'],
                     $data['permissions'],
                 );
             })

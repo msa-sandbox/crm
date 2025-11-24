@@ -127,11 +127,12 @@ class CustomFieldValue
     // Helper methods for typed values
     public function getValueAsArray(): ?array
     {
-        if ($this->value === null) {
+        if (null === $this->value) {
             return null;
         }
 
         $decoded = json_decode($this->value, true);
+
         return is_array($decoded) ? $decoded : null;
     }
 
@@ -144,19 +145,20 @@ class CustomFieldValue
 
     public function getValueAsInt(): ?int
     {
-        return $this->value !== null ? (int) $this->value : null;
+        return null !== $this->value ? (int) $this->value : null;
     }
 
     public function getValueAsFloat(): ?float
     {
-        return $this->value !== null ? (float) $this->value : null;
+        return null !== $this->value ? (float) $this->value : null;
     }
 
     public function getValueAsBool(): ?bool
     {
-        if ($this->value === null) {
+        if (null === $this->value) {
             return null;
         }
+
         return filter_var($this->value, FILTER_VALIDATE_BOOLEAN);
     }
 }

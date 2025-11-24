@@ -37,7 +37,7 @@ class CustomFieldRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find all fields for a specific user and entity type
+     * Find all fields for a specific user and entity type.
      *
      * @return CustomField[]
      */
@@ -54,7 +54,7 @@ class CustomFieldRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find fields by user, entity type and field key
+     * Find fields by user, entity type and field key.
      */
     public function findByUserEntityTypeAndKey(int $userId, string $entityType, string $fieldKey): ?CustomField
     {
@@ -70,7 +70,7 @@ class CustomFieldRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find all required fields for a user and entity type
+     * Find all required fields for a user and entity type.
      *
      * @return CustomField[]
      */
@@ -88,7 +88,7 @@ class CustomFieldRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find all editable fields for a user and entity type
+     * Find all editable fields for a user and entity type.
      *
      * @return CustomField[]
      */

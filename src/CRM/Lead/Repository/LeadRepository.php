@@ -34,7 +34,7 @@ class LeadRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find lead by ID, excluding deleted
+     * Find lead by ID, excluding deleted.
      */
     public function findActiveById(int $id): ?Lead
     {
@@ -48,7 +48,7 @@ class LeadRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find leads by user ID
+     * Find leads by user ID.
      *
      * @return Lead[]
      */

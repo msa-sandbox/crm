@@ -9,6 +9,7 @@ use App\Exception\AuthException;
 use App\Exception\InfrastructureException;
 use InvalidArgumentException;
 use LogicException;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
@@ -16,6 +17,7 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
  * We want to customize some exceptions since they are logical cases and not exceptions.
  * For example, some unicity constraints.
  */
+#[AsEventListener(event: 'kernel.exception')]
 final class ExceptionListener
 {
     public function onKernelException(ExceptionEvent $event): void

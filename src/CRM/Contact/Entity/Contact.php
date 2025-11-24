@@ -185,13 +185,13 @@ class Contact
     }
 
     /**
-     * Get array of lead IDs
+     * Get array of lead IDs.
      *
      * @return int[]
      */
     public function getLeadIds(): array
     {
-        return $this->leads->map(fn(Lead $lead) => $lead->getId())->toArray();
+        return $this->leads->map(fn (Lead $lead) => $lead->getId())->toArray();
     }
 
     // Setters

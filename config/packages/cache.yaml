@@ -1,6 +1,14 @@
 framework:
   cache:
     pools:
+      app.cache:
+        adapter: cache.adapter.redis
+        provider: '%env(REDIS_URL)%'
+        default_lifetime: 3600
+      auth.cache:
+        adapter: cache.adapter.redis
+        provider: '%env(REDIS_URL)%'
+        default_lifetime: 86400
       cache.rate_limiter:
         adapter: cache.adapter.redis
         provider: '%env(REDIS_URL)%'

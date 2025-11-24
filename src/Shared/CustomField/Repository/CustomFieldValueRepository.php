@@ -37,7 +37,7 @@ class CustomFieldValueRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find all values for a specific entity
+     * Find all values for a specific entity.
      *
      * @return CustomFieldValue[]
      */
@@ -53,9 +53,10 @@ class CustomFieldValueRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find all values for multiple entities (batch loading)
+     * Find all values for multiple entities (batch loading).
      *
      * @param int[] $entityIds
+     *
      * @return CustomFieldValue[]
      */
     public function findByEntities(string $entityType, array $entityIds): array
@@ -74,12 +75,12 @@ class CustomFieldValueRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find value by field definition and entity
+     * Find value by field definition and entity.
      */
     public function findByFieldAndEntity(
         int $fieldDefinitionId,
         string $entityType,
-        int $entityId
+        int $entityId,
     ): ?CustomFieldValue {
         return $this->createQueryBuilder('cfv')
             ->where('cfv.field_definition = :fieldDefinitionId')
@@ -93,7 +94,7 @@ class CustomFieldValueRepository extends ServiceEntityRepository
     }
 
     /**
-     * Delete all values for a specific entity
+     * Delete all values for a specific entity.
      */
     public function deleteByEntity(string $entityType, int $entityId): void
     {
