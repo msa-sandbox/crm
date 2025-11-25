@@ -15,7 +15,9 @@
     "doctrine/orm": "^3.5.2",
     "enqueue/rdkafka": "^0.10.26",
     "lexik/jwt-authentication-bundle": "^3.1.1",
+    "nelmio/api-doc-bundle": "^5.8",
     "psr/simple-cache": "^3.0",
+    "symfony/asset": "7.3.*",
     "symfony/cache": "7.3.*",
     "symfony/console": "7.3.*",
     "symfony/dotenv": "7.3.*",
@@ -27,9 +29,12 @@
     "symfony/rate-limiter": "7.3.*",
     "symfony/runtime": "7.3.*",
     "symfony/serializer": "7.3.*",
+    "symfony/twig-bundle": "7.3.*",
     "symfony/uid": "7.3.*",
     "symfony/validator": "7.3.*",
-    "symfony/yaml": "7.3.*"
+    "symfony/yaml": "7.3.*",
+    "twig/extra-bundle": "^2.12|^3.0",
+    "twig/twig": "^2.12|^3.0"
   },
   "require-dev": {
     "doctrine/doctrine-fixtures-bundle": "^4.2",

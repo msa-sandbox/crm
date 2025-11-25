@@ -1,0 +1,15 @@
+nelmio_api_doc:
+  documentation:
+    info:
+      title: CRM application
+      description: API docs for CRM application
+      version: 0.x
+    components:
+      securitySchemes:
+        Bearer:
+          type: http
+          scheme: bearer
+          bearerFormat: JWT
+  areas: # to filter documented areas
+    path_patterns:
+      - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
