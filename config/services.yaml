@@ -46,3 +46,7 @@ services:
 #      $brokers: '%env(KAFKA_BROKERS)%'
 #      $topicName: '%env(KAFKA_TOPIC)%'
 #    tags: [ 'console.command' ]
+
+
+  # Aliases
+  Prometheus\CollectorRegistry: '@prometheus_metrics_bundle.collector_registry'

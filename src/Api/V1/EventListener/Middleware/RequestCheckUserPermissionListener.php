@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Api\V1\EventListener;
+namespace App\Api\V1\EventListener\Middleware;
 
 use App\Security\User;
 use Psr\SimpleCache\CacheInterface;
@@ -16,9 +16,10 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 /**
  * If someone changed user permissions - we should block the request and ask the user to refresh tokens.
  *
- * Priority is set to a negative value to make this listener run AFTER authorization.
+ * Priority is set to 7 to make this listener run AFTER authorization.
+ * Auth firewall is 8 by default (bin/console debug:event-dispatcher kernel.request -> )
  */
-#[AsEventListener(event: 'kernel.request', priority: -10)]
+#[AsEventListener(event: 'kernel.request', priority: 7)]
 readonly class RequestCheckUserPermissionListener
 {
     public function __construct(

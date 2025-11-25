@@ -1,2 +1,3 @@
 app_metrics:
-  resource: '@ArtprimaPrometheusMetricsBundle/Resources/config/routing.xml'
+  path: /metrics
+  controller: Artprima\PrometheusMetricsBundle\Controller\MetricsController::prometheus
