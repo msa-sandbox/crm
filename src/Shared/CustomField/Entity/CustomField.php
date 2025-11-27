@@ -20,19 +20,21 @@ class CustomField
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'AUTO')]
     #[ORM\Column(type: 'integer')]
-    private int $id;
+    private ?int $id;
 
-    // User from another microservice (only ID)
     #[ORM\Column(type: 'integer', nullable: false)]
-    private int $user_id;
+    private int $accountId;
+
+    #[ORM\Column(type: 'integer', nullable: false)]
+    private int $userId;
 
     // Entity type: 'lead', 'contact', 'deal', 'company'
     #[ORM\Column(length: 50, nullable: false)]
-    private string $entity_type;
+    private string $entityType;
 
     // Unique field key within entity_type
     #[ORM\Column(length: 100, nullable: false)]
-    private string $field_key;
+    private string $fieldKey;
 
     // Human-readable field label
     #[ORM\Column(length: 150, nullable: false)]
@@ -40,29 +42,55 @@ class CustomField
 
     // Field data type: 'string', 'number', 'boolean', 'date', 'select', 'multiselect'
     #[ORM\Column(length: 50, nullable: false)]
-    private string $field_type;
+    private string $fieldType;
 
     // Additional options stored as JSON (e.g., select options, validation rules)
     #[ORM\Column(type: 'json', nullable: true)]
-    private ?array $options = null;
+    private ?array $options;
 
     // Is this field required?
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
-    private bool $is_required = false;
+    private bool $isRequired;
 
     // Can this field be edited/deleted?
     #[ORM\Column(type: 'boolean', options: ['default' => true])]
-    private bool $is_editable = true;
+    private bool $isEditable;
 
     // Is this a system field? (e.g., email, phone)
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
-    private bool $is_system = false;
+    private bool $isSystem;
 
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $created_at;
 
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $updated_at;
+
+    public function __construct(
+        int $accountId,
+        int $userId,
+        string $entityType,
+        string $fieldKey,
+        string $label,
+        string $fieldType,
+        ?int $id = null,
+        ?array $options = null,
+        bool $isRequired = false,
+        bool $isEditable = true,
+        bool $isSystem = false,
+    ) {
+        $this->accountId = $accountId;
+        $this->userId = $userId;
+        $this->entityType = $entityType;
+        $this->fieldKey = $fieldKey;
+        $this->label = $label;
+        $this->fieldType = $fieldType;
+        $this->id = $id;
+        $this->options = $options;
+        $this->isRequired = $isRequired;
+        $this->isEditable = $isEditable;
+        $this->isSystem = $isSystem;
+    }
 
     #[ORM\PrePersist]
     public function onPrePersist(): void
@@ -84,19 +112,24 @@ class CustomField
         return $this->id;
     }
 
+    public function getAccountId(): int
+    {
+        return $this->accountId;
+    }
+
     public function getUserId(): int
     {
-        return $this->user_id;
+        return $this->userId;
     }
 
     public function getEntityType(): string
     {
-        return $this->entity_type;
+        return $this->entityType;
     }
 
     public function getFieldKey(): string
     {
-        return $this->field_key;
+        return $this->fieldKey;
     }
 
     public function getLabel(): string
@@ -106,7 +139,7 @@ class CustomField
 
     public function getFieldType(): string
     {
-        return $this->field_type;
+        return $this->fieldType;
     }
 
     public function getOptions(): ?array
@@ -116,17 +149,17 @@ class CustomField
 
     public function isRequired(): bool
     {
-        return $this->is_required;
+        return $this->isRequired;
     }
 
     public function isEditable(): bool
     {
-        return $this->is_editable;
+        return $this->isEditable;
     }
 
     public function isSystem(): bool
     {
-        return $this->is_system;
+        return $this->isSystem;
     }
 
     public function getCreatedAt(): DateTimeImmutable
@@ -137,69 +170,5 @@ class CustomField
     public function getUpdatedAt(): DateTimeImmutable
     {
         return $this->updated_at;
-    }
-
-    // Setters
-    public function setUserId(int $user_id): self
-    {
-        $this->user_id = $user_id;
-
-        return $this;
-    }
-
-    public function setEntityType(string $entity_type): self
-    {
-        $this->entity_type = $entity_type;
-
-        return $this;
-    }
-
-    public function setFieldKey(string $field_key): self
-    {
-        $this->field_key = $field_key;
-
-        return $this;
-    }
-
-    public function setLabel(string $label): self
-    {
-        $this->label = $label;
-
-        return $this;
-    }
-
-    public function setFieldType(string $field_type): self
-    {
-        $this->field_type = $field_type;
-
-        return $this;
-    }
-
-    public function setOptions(?array $options): self
-    {
-        $this->options = $options;
-
-        return $this;
-    }
-
-    public function setIsRequired(bool $is_required): self
-    {
-        $this->is_required = $is_required;
-
-        return $this;
-    }
-
-    public function setIsEditable(bool $is_editable): self
-    {
-        $this->is_editable = $is_editable;
-
-        return $this;
-    }
-
-    public function setIsSystem(bool $is_system): self
-    {
-        $this->is_system = $is_system;
-
-        return $this;
     }
 }

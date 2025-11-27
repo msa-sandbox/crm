@@ -9,9 +9,6 @@ use App\CRM\Contact\Entity\Contact;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Contact>
- */
 class ContactRepository extends ServiceEntityRepository implements ContactRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
@@ -48,6 +45,9 @@ class ContactRepository extends ServiceEntityRepository implements ContactReposi
             ->getOneOrNullResult();
     }
 
+    /**
+     * @inheritDoc
+     */
     public function findExistingByEmailsAndAccount(array $emails, int $accountId, bool $includeDeleted = false): array
     {
         if (!$emails) {

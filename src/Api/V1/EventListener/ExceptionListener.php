@@ -7,7 +7,6 @@ namespace App\Api\V1\EventListener;
 use App\Api\V1\Response\ApiResponse;
 use App\Exception\DomainException;
 use App\Exception\InfrastructureException;
-use InvalidArgumentException;
 use LogicException;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -29,14 +28,14 @@ final class ExceptionListener
         $status = match (true) {
             $exception instanceof LogicException => 400,
             $exception instanceof AccessDeniedException => 403,
-            $exception instanceof InvalidArgumentException => 422,
+            $exception instanceof \InvalidArgumentException => 422,
             $exception instanceof DomainException => 422,
             $exception instanceof HttpExceptionInterface => $exception->getStatusCode(),
             $exception instanceof InfrastructureException => 500,
             default => 500,
         };
 
-        $message = $exception->getMessage() ?? 'Unexpected error';
+        $message = $exception->getMessage() ?: 'Unexpected error';
 
         $response = ApiResponse::error($message, status: $status);
         $event->setResponse(new JsonResponse($response->toArray(), $response->getStatus()));

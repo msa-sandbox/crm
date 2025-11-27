@@ -21,42 +21,56 @@ class CustomFieldValue
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'AUTO')]
     #[ORM\Column(type: 'integer')]
-    private int $id;
+    private ?int $id;
 
     #[ORM\ManyToOne(targetEntity: CustomField::class)]
     #[ORM\JoinColumn(name: 'custom_field_id', nullable: false, onDelete: 'CASCADE')]
-    private CustomField $custom_field;
+    private CustomField $customField;
 
     // Entity type: 'lead', 'contact' ...
     #[ORM\Column(length: 50, nullable: false)]
-    private string $entity_type;
+    private string $entityType;
 
     // ID of the entity (Lead, Contact ...
     #[ORM\Column(type: 'integer', nullable: false)]
-    private int $entity_id;
+    private int $entityId;
 
     // Actual field value (stored as TEXT, can be JSON for complex types)
     #[ORM\Column(type: 'text', nullable: true)]
-    private ?string $value = null;
+    private ?string $value;
 
     #[ORM\Column(type: 'datetime_immutable')]
-    private DateTimeImmutable $created_at;
+    private DateTimeImmutable $createdAt;
 
     #[ORM\Column(type: 'datetime_immutable')]
-    private DateTimeImmutable $updated_at;
+    private DateTimeImmutable $updatedAt;
+
+    public function __construct(
+        CustomField $customField,
+        string $entityType,
+        int $entityId,
+        int $id = null,
+        string $value = null,
+    ) {
+        $this->id = $id;
+        $this->customField = $customField;
+        $this->entityType = $entityType;
+        $this->entityId = $entityId;
+        $this->value = $value;
+    }
 
     #[ORM\PrePersist]
     public function onPrePersist(): void
     {
         $now = new DateTimeImmutable();
-        $this->created_at = $now;
-        $this->updated_at = $now;
+        $this->createdAt = $now;
+        $this->updatedAt = $now;
     }
 
     #[ORM\PreUpdate]
     public function onPreUpdate(): void
     {
-        $this->updated_at = new DateTimeImmutable();
+        $this->updatedAt = new DateTimeImmutable();
     }
 
     // Getters
@@ -67,17 +81,17 @@ class CustomFieldValue
 
     public function getCustomField(): CustomField
     {
-        return $this->custom_field;
+        return $this->customField;
     }
 
     public function getEntityType(): string
     {
-        return $this->entity_type;
+        return $this->entityType;
     }
 
     public function getEntityId(): int
     {
-        return $this->entity_id;
+        return $this->entityId;
     }
 
     public function getValue(): ?string
@@ -87,60 +101,12 @@ class CustomFieldValue
 
     public function getCreatedAt(): DateTimeImmutable
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
     public function getUpdatedAt(): DateTimeImmutable
     {
-        return $this->updated_at;
-    }
-
-    // Setters
-    public function setCustomField(CustomField $custom_field): self
-    {
-        $this->custom_field = $custom_field;
-
-        return $this;
-    }
-
-    public function setEntityType(string $entity_type): self
-    {
-        $this->entity_type = $entity_type;
-
-        return $this;
-    }
-
-    public function setEntityId(int $entity_id): self
-    {
-        $this->entity_id = $entity_id;
-
-        return $this;
-    }
-
-    public function setValue(?string $value): self
-    {
-        $this->value = $value;
-
-        return $this;
-    }
-
-    // Helper methods for typed values
-    public function getValueAsArray(): ?array
-    {
-        if (null === $this->value) {
-            return null;
-        }
-
-        $decoded = json_decode($this->value, true);
-
-        return is_array($decoded) ? $decoded : null;
-    }
-
-    public function setValueFromArray(array $value): self
-    {
-        $this->value = json_encode($value);
-
-        return $this;
+        return $this->updatedAt;
     }
 
     public function getValueAsInt(): ?int

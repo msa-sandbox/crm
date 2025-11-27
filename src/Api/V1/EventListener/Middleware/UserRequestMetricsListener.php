@@ -29,7 +29,7 @@ readonly class UserRequestMetricsListener
             return;
         }
 
-        /** @var User $user */
+        /** @var User|null $user */
         $user = $this->security->getUser();
         if (!$user) {
             // Again some public endpoint.
