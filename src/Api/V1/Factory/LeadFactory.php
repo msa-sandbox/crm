@@ -9,13 +9,14 @@ use App\CRM\Lead\Entity\Lead;
 
 class LeadFactory
 {
-    public function fromDto(CreateLeadDto $dto, int $userId): Lead
+    public function fromDto(CreateLeadDto $dto, int $accountId, int $userId): Lead
     {
         return new Lead(
             title: $dto->getTitle(),
             status: $dto->getStatus(),
             pipelineStage: $dto->getPipelineStage(),
             budget: $dto->getBudget(),
+            accountId: $accountId,
             userId: $userId,
             createdBy: $userId,
             updatedBy: $userId,

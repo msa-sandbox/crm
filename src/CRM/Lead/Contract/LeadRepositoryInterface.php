@@ -15,5 +15,5 @@ interface LeadRepositoryInterface extends ObjectRepository
 
     public function findActiveById(int $id): ?Lead;
 
-    public function findByUserId(int $userId, bool $includeDeleted = false): array;
+    public function findByAccountId(int $accountId, bool $includeDeleted = false): array;
 }

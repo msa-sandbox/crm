@@ -8,7 +8,7 @@ use App\CRM\Lead\Enum\PipelineStageEnum;
 use App\CRM\Lead\Enum\StatusEnum;
 use Symfony\Component\Validator\Constraints as Assert;
 
-readonly class CreateLeadDto
+readonly class CreateLeadWithContactDto
 {
     public function __construct(
         #[Assert\NotBlank]
@@ -22,6 +22,7 @@ readonly class CreateLeadDto
         #[Assert\Choice(callback: 'possibleStatuses')]
         private mixed $status = null,
 
+        #[Assert\NotBlank]
         #[Assert\Type('string')]
         #[Assert\Length(min: 2, max: 50)]
         #[Assert\Choice(callback: 'possiblePipelineStages')]
@@ -52,9 +53,9 @@ readonly class CreateLeadDto
         return (string) $this->status;
     }
 
-    public function getPipelineStage(): ?string
+    public function getPipelineStage(): string
     {
-        return $this->pipelineStage ? (string) $this->pipelineStage : null;
+        return (string) $this->pipelineStage;
     }
 
     public function getBudget(): string

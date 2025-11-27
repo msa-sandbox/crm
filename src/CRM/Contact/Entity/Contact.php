@@ -6,6 +6,7 @@ namespace App\CRM\Contact\Entity;
 
 use App\CRM\Contact\Repository\ContactRepository;
 use App\CRM\Lead\Entity\Lead;
+use App\Exception\DomainException;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -14,57 +15,60 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: ContactRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Table(name: 'contacts')]
-#[ORM\Index(name: 'idx_contacts_user_id', columns: ['user_id'])]
-#[ORM\Index(name: 'idx_contacts_user_active', columns: ['user_id', 'is_deleted'])]
+#[ORM\Index(name: 'idx_contacts_account_id', columns: ['account_id'])]
+#[ORM\Index(name: 'idx_contacts_account_active', columns: ['account_id', 'is_deleted'])]
+#[ORM\Index(name: 'idx_contacts_account_email_active', columns: ['account_id', 'email', 'is_deleted'])] // soft unique index
 class Contact
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'AUTO')]
     #[ORM\Column]
-    private int $id;
+    private ?int $id;
 
     #[ORM\Column(length: 100, nullable: false)]
-    private string $first_name;
+    private string $firstName;
 
     #[ORM\Column(length: 100, nullable: false)]
-    private string $last_name;
+    private string $lastName;
 
     #[ORM\Column(length: 150, nullable: true)]
-    private ?string $email = null;
+    private ?string $email;
 
     #[ORM\Column(length: 20, nullable: true)]
-    private ?string $phone = null;
+    private ?string $phone;
 
     #[ORM\Column(length: 100, nullable: true)]
-    private ?string $company = null;
+    private ?string $company;
 
     #[ORM\Column(length: 100, nullable: true)]
-    private ?string $city = null;
+    private ?string $city;
 
     #[ORM\Column(length: 100, nullable: true)]
-    private ?string $country = null;
+    private ?string $country;
 
     #[ORM\Column(type: 'text', nullable: true)]
-    private ?string $notes = null;
+    private ?string $notes;
 
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
-    private bool $is_deleted = false;
-
-    // User from another microservice (only ID)
-    #[ORM\Column(type: 'integer', nullable: false)]
-    private int $user_id;
+    private bool $isDeleted;
 
     #[ORM\Column(type: 'integer', nullable: false)]
-    private int $created_by;
+    private int $accountId;
 
     #[ORM\Column(type: 'integer', nullable: false)]
-    private int $updated_by;
+    private int $userId;
+
+    #[ORM\Column(type: 'integer', nullable: false)]
+    private int $createdBy;
+
+    #[ORM\Column(type: 'integer', nullable: false)]
+    private int $updatedBy;
 
     #[ORM\Column(type: 'datetime_immutable', options: ['default' => 'CURRENT_TIMESTAMP'])]
-    private DateTimeImmutable $created_at;
+    private DateTimeImmutable $createdAt;
 
     #[ORM\Column(type: 'datetime_immutable', options: ['default' => 'CURRENT_TIMESTAMP'])]
-    private DateTimeImmutable $updated_at;
+    private DateTimeImmutable $updatedAt;
 
     /**
      * @var Collection<int, Lead>
@@ -72,22 +76,78 @@ class Contact
     #[ORM\ManyToMany(targetEntity: Lead::class, mappedBy: 'contacts')]
     private Collection $leads;
 
-    public function __construct()
-    {
+    public function __construct(
+        string $firstName,
+        string $lastName,
+        int $accountId,
+        int $userId,
+        int $createdBy,
+        int $updatedBy,
+        ?int $id = null,
+        bool $isDeleted = false,
+        ?string $email = null,
+        ?string $phone = null,
+        ?string $company = null,
+        ?string $city = null,
+        ?string $country = null,
+        ?string $notes = null,
+    ) {
+        $this->id = $id;
+        $this->firstName = $firstName;
+        $this->lastName = $lastName;
+        $this->accountId = $accountId;
+        $this->userId = $userId;
+        $this->createdBy = $createdBy;
+        $this->updatedBy = $updatedBy;
+        $this->isDeleted = $isDeleted;
+        $this->email = $email;
+        $this->phone = $phone;
+        $this->company = $company;
+        $this->city = $city;
+        $this->country = $country;
+        $this->notes = $notes;
+
         $this->leads = new ArrayCollection();
+    }
+
+    /**
+     * If there was a request to create a new contact, but we have already found it in the database,
+     * we need to update it with new data from the source.
+     *
+     * @param Contact $source
+     *
+     * @return void
+     *
+     * @throws DomainException
+     */
+    public function updateFrom(Contact $source): void
+    {
+        // Check: forbidden to update contact from another account
+        if ($this->accountId !== $source->getAccountId()) {
+            throw new DomainException('Cannot update contact from different account');
+        }
+
+        $this->firstName = $source->getFirstName();
+        $this->lastName = $source->getLastName();
+        $this->phone = $source->getPhone();
+        $this->company = $source->getCompany();
+        $this->city = $source->getCity();
+        $this->country = $source->getCountry();
+        $this->notes = $source->getNotes();
+        $this->updatedBy = $source->getUpdatedBy();
     }
 
     #[ORM\PrePersist]
     public function onPrePersist(): void
     {
-        $this->created_at = new DateTimeImmutable();
-        $this->updated_at = new DateTimeImmutable();
+        $this->createdAt = new DateTimeImmutable();
+        $this->updatedAt = new DateTimeImmutable();
     }
 
     #[ORM\PreUpdate]
     public function onPreUpdate(): void
     {
-        $this->updated_at = new DateTimeImmutable();
+        $this->updatedAt = new DateTimeImmutable();
     }
 
     // Getters
@@ -98,19 +158,19 @@ class Contact
 
     public function getFirstName(): string
     {
-        return $this->first_name;
+        return $this->firstName;
     }
 
     public function getLastName(): string
     {
-        return $this->last_name;
+        return $this->lastName;
     }
 
     public function getFullName(): string
     {
         $parts = array_filter([
-            $this->first_name,
-            $this->last_name,
+            $this->firstName,
+            $this->lastName,
         ]);
 
         return implode(' ', $parts);
@@ -148,32 +208,37 @@ class Contact
 
     public function isDeleted(): bool
     {
-        return $this->is_deleted;
+        return $this->isDeleted;
+    }
+
+    public function getAccountId(): int
+    {
+        return $this->accountId;
     }
 
     public function getUserId(): int
     {
-        return $this->user_id;
+        return $this->userId;
     }
 
     public function getCreatedBy(): int
     {
-        return $this->created_by;
+        return $this->createdBy;
     }
 
     public function getUpdatedBy(): int
     {
-        return $this->updated_by;
+        return $this->updatedBy;
     }
 
     public function getCreatedAt(): DateTimeImmutable
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
     public function getUpdatedAt(): DateTimeImmutable
     {
-        return $this->updated_at;
+        return $this->updatedAt;
     }
 
     /**
@@ -192,90 +257,5 @@ class Contact
     public function getLeadIds(): array
     {
         return $this->leads->map(fn (Lead $lead) => $lead->getId())->toArray();
-    }
-
-    // Setters
-    public function setFirstName(string $first_name): self
-    {
-        $this->first_name = $first_name;
-
-        return $this;
-    }
-
-    public function setLastName(string $last_name): self
-    {
-        $this->last_name = $last_name;
-
-        return $this;
-    }
-
-    public function setEmail(?string $email): self
-    {
-        $this->email = $email;
-
-        return $this;
-    }
-
-    public function setPhone(?string $phone): self
-    {
-        $this->phone = $phone;
-
-        return $this;
-    }
-
-    public function setCompany(?string $company): self
-    {
-        $this->company = $company;
-
-        return $this;
-    }
-
-    public function setCity(?string $city): self
-    {
-        $this->city = $city;
-
-        return $this;
-    }
-
-    public function setCountry(?string $country): self
-    {
-        $this->country = $country;
-
-        return $this;
-    }
-
-    public function setNotes(?string $notes): self
-    {
-        $this->notes = $notes;
-
-        return $this;
-    }
-
-    public function setIsDeleted(bool $is_deleted): self
-    {
-        $this->is_deleted = $is_deleted;
-
-        return $this;
-    }
-
-    public function setUserId(int $user_id): self
-    {
-        $this->user_id = $user_id;
-
-        return $this;
-    }
-
-    public function setCreatedBy(int $created_by): self
-    {
-        $this->created_by = $created_by;
-
-        return $this;
-    }
-
-    public function setUpdatedBy(int $updated_by): self
-    {
-        $this->updated_by = $updated_by;
-
-        return $this;
     }
 }

@@ -50,11 +50,11 @@ class LeadRepository extends ServiceEntityRepository implements LeadRepositoryIn
      *
      * @return Lead[]
      */
-    public function findByUserId(int $userId, bool $includeDeleted = false): array
+    public function findByAccountId(int $accountId, bool $includeDeleted = false): array
     {
         $qb = $this->createQueryBuilder('l')
-            ->where('l.user_id = :userId')
-            ->setParameter('userId', $userId)
+            ->where('l.account_id = :accountId')
+            ->setParameter('accountId', $accountId)
             ->orderBy('l.created_at', 'DESC');
 
         if (!$includeDeleted) {

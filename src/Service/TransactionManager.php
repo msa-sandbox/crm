@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Exception\TransactionException;
-use App\Helper\ExceptionFormatter;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use Psr\Log\LoggerInterface;
 use Throwable;
 
 readonly class TransactionManager

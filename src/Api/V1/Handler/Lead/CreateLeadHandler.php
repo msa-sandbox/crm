@@ -41,7 +41,7 @@ readonly class CreateLeadHandler
 
         $leads = [];
         foreach ($dtos as $dto) {
-            $leads[] = $this->leadFactory->fromDto($dto, $user->getId());
+            $leads[] = $this->leadFactory->fromDto($dto, $user->getAccountId(), $user->getId());
         }
 
         $created = $this->createLead->createLeads($leads);

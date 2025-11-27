@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\CRM\Lead\Entity;
 
 use App\CRM\Contact\Entity\Contact;
+use App\CRM\Lead\Enum\PipelineStageEnum;
 use App\CRM\Lead\Repository\LeadRepository;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -14,9 +15,9 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: LeadRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Table(name: 'leads')]
-#[ORM\Index(name: 'idx_leads_user_id', columns: ['user_id'])]
-#[ORM\Index(name: 'idx_leads_user_active', columns: ['user_id', 'is_deleted'])]
-#[ORM\Index(name: 'idx_leads_user_stage_active', columns: ['user_id', 'pipeline_stage', 'is_deleted'])]
+#[ORM\Index(name: 'idx_leads_account_id', columns: ['account_id'])]
+#[ORM\Index(name: 'idx_leads_account_active', columns: ['account_id', 'is_deleted'])]
+#[ORM\Index(name: 'idx_leads_account_stage_active', columns: ['account_id', 'pipeline_stage', 'is_deleted'])]
 class Lead
 {
     #[ORM\Id]
@@ -45,7 +46,9 @@ class Lead
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $isDeleted = false;
 
-    // User from another microservice (only ID)
+    #[ORM\Column(type: 'integer', nullable: false)]
+    private int $accountId;
+
     #[ORM\Column(type: 'integer', nullable: false)]
     private int $userId;
 
@@ -75,8 +78,9 @@ class Lead
     public function __construct(
         string $title,
         string $status,
-        string $pipelineStage,
+        ?string $pipelineStage,
         string $budget,
+        int $accountId,
         int $userId,
         int $createdBy,
         int $updatedBy,
@@ -87,10 +91,11 @@ class Lead
         $this->id = $id;
         $this->title = $title;
         $this->status = $status;
-        $this->pipelineStage = $pipelineStage;
+        $this->pipelineStage = $pipelineStage ?? PipelineStageEnum::NEW->value;
         $this->budget = $budget;
         $this->description = $description;
         $this->notes = $notes;
+        $this->accountId = $accountId;
         $this->userId = $userId;
         $this->createdBy = $createdBy;
         $this->updatedBy = $updatedBy;
@@ -149,6 +154,11 @@ class Lead
     public function isDeleted(): bool
     {
         return $this->isDeleted;
+    }
+
+    public function getAccountId(): int
+    {
+        return $this->accountId;
     }
 
     public function getUserId(): int

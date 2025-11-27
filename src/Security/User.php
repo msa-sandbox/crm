@@ -13,6 +13,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 readonly class User implements UserInterface
 {
     public function __construct(
+        private int $accountId,
         private int $id,
         private string $username,
         private int $tokenIssuedAt,
@@ -23,6 +24,11 @@ readonly class User implements UserInterface
     public function getId(): int
     {
         return $this->id;
+    }
+
+    public function getAccountId(): int
+    {
+        return $this->accountId;
     }
 
     public function getTokenIssuedAt(): int

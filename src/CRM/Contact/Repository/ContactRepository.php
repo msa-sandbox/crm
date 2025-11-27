@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\CRM\Contact\Repository;
 
+use App\CRM\Contact\Contract\ContactRepositoryInterface;
 use App\CRM\Contact\Entity\Contact;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -11,29 +12,26 @@ use Doctrine\Persistence\ManagerRegistry;
 /**
  * @extends ServiceEntityRepository<Contact>
  */
-class ContactRepository extends ServiceEntityRepository
+class ContactRepository extends ServiceEntityRepository implements ContactRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Contact::class);
     }
 
-    public function save(Contact $contact, bool $flush = true): void
+    public function add(Contact $lead): void
     {
-        $this->getEntityManager()->persist($contact);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
+        $this->getEntityManager()->persist($lead);
     }
 
-    public function remove(Contact $contact, bool $flush = true): void
+    public function remove(Contact $lead): void
     {
-        $this->getEntityManager()->remove($contact);
+        $this->getEntityManager()->remove($lead);
+    }
 
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
+    public function flush(): void
+    {
+        $this->getEntityManager()->flush();
     }
 
     /**
@@ -50,21 +48,20 @@ class ContactRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
-    /**
-     * Find contacts by user ID.
-     *
-     * @return Contact[]
-     */
-    public function findByUserId(int $userId, bool $includeDeleted = false): array
+    public function findExistingByEmailsAndAccount(array $emails, int $accountId, bool $includeDeleted = false): array
     {
+        if (!$emails) {
+            return [];
+        }
+
         $qb = $this->createQueryBuilder('c')
-            ->where('c.user_id = :userId')
-            ->setParameter('userId', $userId)
-            ->orderBy('c.created_at', 'DESC');
+            ->where('c.accountId = :accountId')
+            ->andWhere('c.email IN (:emails)')
+            ->setParameter('accountId', $accountId)
+            ->setParameter('emails', $emails);
 
         if (!$includeDeleted) {
-            $qb->andWhere('c.is_deleted = :deleted')
-                ->setParameter('deleted', false);
+            $qb->andWhere('c.isDeleted = false');
         }
 
         return $qb->getQuery()->getResult();

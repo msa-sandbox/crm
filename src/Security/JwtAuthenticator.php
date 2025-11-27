@@ -64,6 +64,7 @@ class JwtAuthenticator extends AbstractAuthenticator
         return new SelfValidatingPassport(
             new UserBadge($data['username'], function () use ($data) {
                 return new User(
+                    1,  // Currently, we do not support multiple accounts
                     $data['user_id'],
                     $data['username'],
                     $data['iat'],
