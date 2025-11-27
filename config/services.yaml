@@ -47,6 +47,10 @@ services:
 #      $topicName: '%env(KAFKA_TOPIC)%'
 #    tags: [ 'console.command' ]
 
+  # Exception Formatter
+  App\Helper\ExceptionFormatter:
+    arguments:
+      $projectRoot: '%kernel.project_dir%'
 
   # Aliases
   Prometheus\CollectorRegistry: '@prometheus_metrics_bundle.collector_registry'

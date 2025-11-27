@@ -7,10 +7,10 @@ namespace App\Exception;
 use Exception;
 use Throwable;
 
-class InfrastructureException extends Exception
+class TransactionException extends Exception
 {
     public function __construct(
-        string $message = 'Internal error, try later',
+        string $message = 'Transaction failed',
         int $code = 0,
         ?Throwable $previous = null,
     ) {

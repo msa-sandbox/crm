@@ -18,7 +18,7 @@ final readonly class ApiResponse
     ) {
     }
 
-    public static function success(mixed $data = null, string $message = '', int $status = 200): self
+    public static function success(mixed $data = null, string $message = 'Created successfully', int $status = 200): self
     {
         return new self(true, $message, $data, null, $status);
     }

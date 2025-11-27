@@ -107,7 +107,7 @@ CREATE TABLE leads
     title          VARCHAR(100)                           NOT NULL,
     status         VARCHAR(50)                            NOT NULL,
     pipeline_stage VARCHAR(50)                            NOT NULL,
-    budget         NUMERIC(10, 0)                         NOT NULL,
+    budget         NUMERIC(15, 2)                         NOT NULL,
     description    VARCHAR(200) DEFAULT NULL,
     notes          LONGTEXT     DEFAULT NULL,
     is_deleted     TINYINT(1)   DEFAULT 0                 NOT NULL,

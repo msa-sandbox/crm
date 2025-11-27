@@ -22,7 +22,7 @@ class Lead
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'AUTO')]
     #[ORM\Column]
-    private int $id;
+    private ?int $id;
 
     #[ORM\Column(length: 100, nullable: false)]
     private string $title;
@@ -31,35 +31,35 @@ class Lead
     private string $status;
 
     #[ORM\Column(length: 50, nullable: false)]
-    private string $pipeline_stage;
+    private string $pipelineStage;
 
-    #[ORM\Column(type: 'decimal', nullable: false)]
+    #[ORM\Column(type: 'decimal', precision: 15, scale: 2, nullable: false)]
     private string $budget;
 
     #[ORM\Column(length: 200, nullable: true)]
-    private ?string $description = null;
+    private ?string $description;
 
     #[ORM\Column(type: 'text', nullable: true)]
-    private ?string $notes = null;
+    private ?string $notes;
 
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
-    private bool $is_deleted = false;
+    private bool $isDeleted = false;
 
     // User from another microservice (only ID)
     #[ORM\Column(type: 'integer', nullable: false)]
-    private int $user_id;
+    private int $userId;
 
     #[ORM\Column(type: 'integer', nullable: false)]
-    private int $created_by;
+    private int $createdBy;
 
     #[ORM\Column(type: 'integer', nullable: false)]
-    private int $updated_by;
+    private int $updatedBy;
 
     #[ORM\Column(type: 'datetime_immutable', options: ['default' => 'CURRENT_TIMESTAMP'])]
-    private DateTimeImmutable $created_at;
+    private DateTimeImmutable $createdAt;
 
     #[ORM\Column(type: 'datetime_immutable', options: ['default' => 'CURRENT_TIMESTAMP'])]
-    private DateTimeImmutable $updated_at;
+    private DateTimeImmutable $updatedAt;
 
     /**
      * @var Collection<int, Contact>
@@ -72,22 +72,42 @@ class Lead
     )]
     private Collection $contacts;
 
-    public function __construct()
-    {
+    public function __construct(
+        string $title,
+        string $status,
+        string $pipelineStage,
+        string $budget,
+        int $userId,
+        int $createdBy,
+        int $updatedBy,
+        ?int $id = null,
+        ?string $description = null,
+        ?string $notes = null,
+    ) {
+        $this->id = $id;
+        $this->title = $title;
+        $this->status = $status;
+        $this->pipelineStage = $pipelineStage;
+        $this->budget = $budget;
+        $this->description = $description;
+        $this->notes = $notes;
+        $this->userId = $userId;
+        $this->createdBy = $createdBy;
+        $this->updatedBy = $updatedBy;
         $this->contacts = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
     public function onPrePersist(): void
     {
-        $this->created_at = new DateTimeImmutable();
-        $this->updated_at = new DateTimeImmutable();
+        $this->createdAt = new DateTimeImmutable();
+        $this->updatedAt = new DateTimeImmutable();
     }
 
     #[ORM\PreUpdate]
     public function onPreUpdate(): void
     {
-        $this->updated_at = new DateTimeImmutable();
+        $this->updatedAt = new DateTimeImmutable();
     }
 
     // Getters
@@ -108,7 +128,7 @@ class Lead
 
     public function getPipelineStage(): string
     {
-        return $this->pipeline_stage;
+        return $this->pipelineStage;
     }
 
     public function getBudget(): string
@@ -128,32 +148,32 @@ class Lead
 
     public function isDeleted(): bool
     {
-        return $this->is_deleted;
+        return $this->isDeleted;
     }
 
     public function getUserId(): int
     {
-        return $this->user_id;
+        return $this->userId;
     }
 
     public function getCreatedBy(): int
     {
-        return $this->created_by;
+        return $this->createdBy;
     }
 
     public function getUpdatedBy(): int
     {
-        return $this->updated_by;
+        return $this->updatedBy;
     }
 
     public function getCreatedAt(): DateTimeImmutable
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
     public function getUpdatedAt(): DateTimeImmutable
     {
-        return $this->updated_at;
+        return $this->updatedAt;
     }
 
     /**
@@ -162,77 +182,6 @@ class Lead
     public function getContacts(): Collection
     {
         return $this->contacts;
-    }
-
-    // Setters
-    public function setTitle(string $title): self
-    {
-        $this->title = $title;
-
-        return $this;
-    }
-
-    public function setStatus(string $status): self
-    {
-        $this->status = $status;
-
-        return $this;
-    }
-
-    public function setPipelineStage(string $pipeline_stage): self
-    {
-        $this->pipeline_stage = $pipeline_stage;
-
-        return $this;
-    }
-
-    public function setBudget(string $budget): self
-    {
-        $this->budget = $budget;
-
-        return $this;
-    }
-
-    public function setDescription(?string $description): self
-    {
-        $this->description = $description;
-
-        return $this;
-    }
-
-    public function setNotes(?string $notes): self
-    {
-        $this->notes = $notes;
-
-        return $this;
-    }
-
-    public function setIsDeleted(bool $is_deleted): self
-    {
-        $this->is_deleted = $is_deleted;
-
-        return $this;
-    }
-
-    public function setUserId(int $user_id): self
-    {
-        $this->user_id = $user_id;
-
-        return $this;
-    }
-
-    public function setCreatedBy(int $created_by): self
-    {
-        $this->created_by = $created_by;
-
-        return $this;
-    }
-
-    public function setUpdatedBy(int $updated_by): self
-    {
-        $this->updated_by = $updated_by;
-
-        return $this;
     }
 
     // Contact management methods

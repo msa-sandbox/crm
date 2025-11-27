@@ -4,25 +4,28 @@ declare(strict_types=1);
 
 namespace App\Api\V1\Controller;
 
+use App\Api\V1\Dto\Request\Lead\CreateLeadDto;
+use App\Api\V1\Handler\Lead\CreateLeadHandler;
 use App\Api\V1\Response\ApiResponse;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Service\DtoResolver;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('IS_AUTHENTICATED_FULLY')]
-class LeadController
+readonly class LeadController
 {
-    public function __construct()
-    {
+    public function __construct(
+        private DtoResolver $dtoResolver,
+    ) {
     }
 
-    #[Route('/leads')]
-    public function getLeads(UserInterface $user): ApiResponse
+    #[Route('/leads', methods: ['POST'])]
+    public function createLeads(Request $request, CreateLeadHandler $handler): ApiResponse
     {
-        return ApiResponse::success($user->getPermissions());
+        $dtos = $this->dtoResolver->resolve(CreateLeadDto::class, $request->toArray());
+        $res = $handler->createBulk($dtos);
 
-        //        $response = new JsonResponse($user->getPermissions());
-        //        return $response;
+        return ApiResponse::success($res);
     }
 }

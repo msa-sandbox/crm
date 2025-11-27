@@ -4,33 +4,31 @@ declare(strict_types=1);
 
 namespace App\CRM\Lead\Repository;
 
+use App\CRM\Lead\Contract\LeadRepositoryInterface;
 use App\CRM\Lead\Entity\Lead;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-class LeadRepository extends ServiceEntityRepository
+class LeadRepository extends ServiceEntityRepository implements LeadRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Lead::class);
     }
 
-    public function save(Lead $contact, bool $flush = true): void
+    public function add(Lead $lead): void
     {
-        $this->getEntityManager()->persist($contact);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
+        $this->getEntityManager()->persist($lead);
     }
 
-    public function remove(Lead $contact, bool $flush = true): void
+    public function remove(Lead $lead): void
     {
-        $this->getEntityManager()->remove($contact);
+        $this->getEntityManager()->remove($lead);
+    }
 
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
+    public function flush(): void
+    {
+        $this->getEntityManager()->flush();
     }
 
     /**

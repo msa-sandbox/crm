@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace App\Api\V1\EventListener;
 
 use App\Api\V1\Response\ApiResponse;
-use App\Exception\AuthException;
+use App\Exception\DomainException;
 use App\Exception\InfrastructureException;
 use InvalidArgumentException;
 use LogicException;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 /**
  * We want to customize some exceptions since they are logical cases and not exceptions.
@@ -24,33 +26,19 @@ final class ExceptionListener
     {
         $exception = $event->getThrowable();
 
-        if ($exception instanceof LogicException) {
-            $status = $exception instanceof InvalidArgumentException ? 422 : 400;
+        $status = match (true) {
+            $exception instanceof LogicException => 400,
+            $exception instanceof AccessDeniedException => 403,
+            $exception instanceof InvalidArgumentException => 422,
+            $exception instanceof DomainException => 422,
+            $exception instanceof HttpExceptionInterface => $exception->getStatusCode(),
+            $exception instanceof InfrastructureException => 500,
+            default => 500,
+        };
 
-            $response = ApiResponse::error($exception->getMessage(), status: $status);
+        $message = $exception->getMessage() ?? 'Unexpected error';
 
-            $event->setResponse(new JsonResponse(
-                $response->toArray(),
-                $response->getStatus()
-            ));
-        }
-
-        if ($exception instanceof AuthException) {
-            $response = ApiResponse::error($exception->getMessage(), status: 401);
-
-            $event->setResponse(new JsonResponse(
-                $response->toArray(),
-                $response->getStatus()
-            ));
-        }
-
-        if ($exception instanceof InfrastructureException) {
-            $response = ApiResponse::error('Internal error, try later', status: 500);
-
-            $event->setResponse(new JsonResponse(
-                $response->toArray(),
-                $response->getStatus()
-            ));
-        }
+        $response = ApiResponse::error($message, status: $status);
+        $event->setResponse(new JsonResponse($response->toArray(), $response->getStatus()));
     }
 }

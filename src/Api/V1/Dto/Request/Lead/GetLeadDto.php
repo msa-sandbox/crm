@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Api\V1\Handler\Lead;
+namespace App\Api\V1\Dto\Request\Lead;
 
-class ListLeadsHandler
+class GetLeadDto
 {
     public function __construct()
     {
