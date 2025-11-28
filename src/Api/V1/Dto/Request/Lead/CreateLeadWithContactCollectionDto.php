@@ -18,8 +18,9 @@ readonly class CreateLeadWithContactCollectionDto implements DtoCollectionInterf
         #[Assert\All([
             new Assert\Type(type: CreateLeadWithContactDto::class),
         ])]
-        public array $leads = []
-    ) {}
+        public array $leads = [],
+    ) {
+    }
 
     public static function getItemClass(): string
     {

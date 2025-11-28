@@ -46,7 +46,7 @@ class ContactRepository extends ServiceEntityRepository implements ContactReposi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function findExistingByEmailsAndAccount(array $emails, int $accountId, bool $includeDeleted = false): array
     {

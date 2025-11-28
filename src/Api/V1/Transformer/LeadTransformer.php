@@ -24,4 +24,33 @@ class LeadTransformer
     {
         return array_map(fn (Lead $lead) => ['id' => $lead->getId()], $data);
     }
+
+    /**
+     * For requests to POST /leads/complex.
+     *
+     * @param array $data
+     *
+     * @return array
+     * [
+     *  {
+     *    "id": 89,
+     *    "contacts": [
+     *      { "id": 20 },
+     *      { "id": 21 }
+     *    ]
+     *  }
+     * ]
+     */
+    public function transformCreateLeadsWithContacts(array $data): array
+    {
+        return array_map(function (Lead $lead) {
+            return [
+                'id' => $lead->getId(),
+                'contacts' => array_map(
+                    fn ($contact) => ['id' => $contact->getId()],
+                    $lead->getContacts()->toArray()
+                ),
+            ];
+        }, $data);
+    }
 }

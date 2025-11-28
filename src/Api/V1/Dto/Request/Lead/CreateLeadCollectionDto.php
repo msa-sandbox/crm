@@ -18,8 +18,9 @@ readonly class CreateLeadCollectionDto implements DtoCollectionInterface
         #[Assert\All([
             new Assert\Type(type: CreateLeadDto::class),
         ])]
-        private array $leads = []
-    ) {}
+        private array $leads = [],
+    ) {
+    }
 
     public static function getItemClass(): string
     {

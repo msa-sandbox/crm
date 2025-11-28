@@ -42,6 +42,7 @@ readonly class CreateLeadWithContactDto
         private mixed $notes = null,
 
         #[Assert\Valid]
+        #[Assert\NotBlank(message: 'At least one contact must be provided.')]
         private ?CreateContactCollection $_embedded = null,
     ) {
     }

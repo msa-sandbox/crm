@@ -30,7 +30,6 @@ namespace App\Api\V1\Dto;
  *       }
  *   }
  */
-
 interface DtoCollectionInterface
 {
     /**

@@ -18,9 +18,8 @@ readonly class LeadController
     #[Route('/leads', methods: ['POST'])]
     public function createLeads(
         #[MapRequestPayload] CreateLeadCollectionDto $dtos,
-        CreateLeadHandler $handler
-    ): ApiResponse
-    {
+        CreateLeadHandler $handler,
+    ): ApiResponse {
         $res = $handler->createBulk($dtos);
 
         return ApiResponse::success($res);
@@ -29,10 +28,9 @@ readonly class LeadController
     #[Route('/leads/complex', methods: ['POST'])]
     public function createLeadsWithContacts(
         #[MapRequestPayload] CreateLeadWithContactCollectionDto $dtos,
-        CreateLeadHandler $handler
-    ): ApiResponse
-    {
-        $res = $handler->createBulk($dtos->all());
+        CreateLeadHandler $handler,
+    ): ApiResponse {
+        $res = $handler->createBulkWithContacts($dtos);
 
         return ApiResponse::success($res);
     }

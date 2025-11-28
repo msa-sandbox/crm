@@ -17,7 +17,7 @@ readonly class ContactController
     #[Route('/contacts', methods: ['POST'])]
     public function createContacts(
         #[MapRequestPayload] CreateContactCollection $dtos,
-        CreateContactHandler $handler
+        CreateContactHandler $handler,
     ): ApiResponse {
         $res = $handler->createBulk($dtos);
 

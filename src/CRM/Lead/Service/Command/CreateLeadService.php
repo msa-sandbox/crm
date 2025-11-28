@@ -7,14 +7,12 @@ namespace App\CRM\Lead\Service\Command;
 use App\CRM\Lead\Contract\CreateLeadInterface;
 use App\CRM\Lead\Contract\LeadRepositoryInterface;
 use App\CRM\Lead\Entity\Lead;
-use App\Service\TransactionManager;
 use Throwable;
 
 readonly class CreateLeadService implements CreateLeadInterface
 {
     public function __construct(
         private LeadRepositoryInterface $leadRepository,
-        private TransactionManager $transactionManager,
     ) {
     }
 
@@ -29,14 +27,12 @@ readonly class CreateLeadService implements CreateLeadInterface
      */
     public function createLeads(array $data): array
     {
-        return $this->transactionManager->execute(function () use ($data) {
-            foreach ($data as $lead) {
-                $this->leadRepository->add($lead);
-            }
+        foreach ($data as $lead) {
+            $this->leadRepository->add($lead);
+        }
 
-            $this->leadRepository->flush();
+        $this->leadRepository->flush();
 
-            return $data;
-        });
+        return $data;
     }
 }

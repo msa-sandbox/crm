@@ -49,8 +49,8 @@ class CustomFieldValue
         CustomField $customField,
         string $entityType,
         int $entityId,
-        int $id = null,
-        string $value = null,
+        ?int $id = null,
+        ?string $value = null,
     ) {
         $this->id = $id;
         $this->customField = $customField;

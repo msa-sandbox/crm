@@ -12,8 +12,10 @@ use App\Security\Enum\PermissionActionEnum;
 use App\Security\Enum\PermissionEntityEnum;
 use App\Security\PermissionChecker;
 use App\Security\User;
+use App\Service\TransactionManager;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
+use Throwable;
 
 readonly class CreateContactHandler
 {
@@ -21,6 +23,7 @@ readonly class CreateContactHandler
         private Security $security,
         private PermissionChecker $permissionChecker,
         private ContactFactory $contactFactory,
+        private TransactionManager $transactionManager,
         private CreateContactInterface $createContact,
         private ContactTransformer $contactTransformer,
     ) {
@@ -32,6 +35,8 @@ readonly class CreateContactHandler
      * @param CreateContactCollection $dtos
      *
      * @return array
+     *
+     * @throws Throwable
      */
     public function createBulk(CreateContactCollection $dtos): array
     {
@@ -42,14 +47,16 @@ readonly class CreateContactHandler
 
         $this->permissionChecker->assertGranted($user, PermissionEntityEnum::CONTACT, PermissionActionEnum::WRITE);
 
-        $contacts = [];
-        foreach ($dtos->all() as $dto) {
-            $contacts[] = $this->contactFactory->fromDto($dto, $user->getAccountId(), $user->getId());
-        }
+        return $this->transactionManager->execute(function () use ($dtos, $user) {
+            $contacts = [];
+            foreach ($dtos->all() as $dto) {
+                $contacts[] = $this->contactFactory->fromDto($dto, $user->getAccountId(), $user->getId());
+            }
 
-        $created = $this->createContact->createContacts($contacts, $user->getAccountId());
+            $created = $this->createContact->createContacts($contacts, $user->getAccountId());
 
-        return $this->contactTransformer->transformCreateContacts($created);
+            return $this->contactTransformer->transformCreateContacts($created);
+        });
     }
 
     /**
