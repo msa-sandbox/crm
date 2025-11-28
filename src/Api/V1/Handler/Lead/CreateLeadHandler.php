@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api\V1\Handler\Lead;
 
+use App\Api\V1\Dto\Request\Lead\CreateLeadCollectionDto;
 use App\Api\V1\Dto\Request\Lead\CreateLeadDto;
 use App\Api\V1\Factory\LeadFactory;
 use App\Api\V1\Transformer\LeadTransformer;
@@ -28,11 +29,11 @@ readonly class CreateLeadHandler
     /**
      * We do not have any unique logic, so create all leads.
      *
-     * @param CreateLeadDto[] $dtos
+     * @param CreateLeadCollectionDto $dtos
      *
      * @return array
      */
-    public function createBulk(array $dtos): array
+    public function createBulk(CreateLeadCollectionDto $dtos): array
     {
         /** @var User $user */
         $user = $this->security->getUser();
@@ -40,7 +41,7 @@ readonly class CreateLeadHandler
         $this->permissionChecker->assertGranted($user, PermissionEntityEnum::LEAD, PermissionActionEnum::WRITE);
 
         $leads = [];
-        foreach ($dtos as $dto) {
+        foreach ($dtos->all() as $dto) {
             $leads[] = $this->leadFactory->fromDto($dto, $user->getAccountId(), $user->getId());
         }
 

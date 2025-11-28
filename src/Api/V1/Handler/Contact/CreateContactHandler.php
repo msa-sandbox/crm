@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api\V1\Handler\Contact;
 
-use App\Api\V1\Dto\Request\Contact\CreateContactDto;
+use App\Api\V1\Dto\Request\Contact\CreateContactCollection;
 use App\Api\V1\Factory\ContactFactory;
 use App\Api\V1\Transformer\ContactTransformer;
 use App\CRM\Contact\Contract\CreateContactInterface;
@@ -29,21 +29,21 @@ readonly class CreateContactHandler
     /**
      * We do not have any unique logic, so create all contacts.
      *
-     * @param CreateContactDto[] $dtos
+     * @param CreateContactCollection $dtos
      *
      * @return array
      */
-    public function createBulk(array $dtos): array
+    public function createBulk(CreateContactCollection $dtos): array
     {
         /** @var User $user */
         $user = $this->security->getUser();
 
-        $this->assertNoDuplicateEmails($dtos);
+        $this->assertNoDuplicateEmails($dtos->all());
 
         $this->permissionChecker->assertGranted($user, PermissionEntityEnum::CONTACT, PermissionActionEnum::WRITE);
 
         $contacts = [];
-        foreach ($dtos as $dto) {
+        foreach ($dtos->all() as $dto) {
             $contacts[] = $this->contactFactory->fromDto($dto, $user->getAccountId(), $user->getId());
         }
 
