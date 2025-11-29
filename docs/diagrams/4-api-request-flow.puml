@@ -1,78 +1,44 @@
-@startuml API Request Flow
+@startuml
+title API Request Flow - CRM Service
+!pragma layout smetana
 !theme plain
 
 actor Client
-participant "API v1\nController" as Controller
-participant "Rate Limiter" as RateLimit
-participant "Use Case\nService" as Service
-participant "Domain\nEntity" as Entity
-participant "Repository" as Repo
-participant "Transformer" as Trans
-database "PostgreSQL" as DB
+participant "LeadController" as Controller
+participant "CreateLeadHandler" as CreateHandler
+participant "GetLeadHandler" as GetHandler
+participant "LeadFactory" as Factory
+participant "CreateLeadService" as CreateService
+participant "GetLeadService" as GetService
+database "LeadRepository" as LeadRepo
+participant "LeadTransformer" as Transformer
 
 == POST /api/v1/leads ==
-Client -> Controller: POST /api/v1/leads\n{"title": "...", "contactId": 5}
-activate Controller
 
-Controller -> RateLimit: Check rate limit
-RateLimit --> Controller: OK (847/1000 remaining)
+Client -> Controller : POST /api/v1/leads\n(JSON body)
+Controller -> CreateHandler : createBulk(CreateLeadCollectionDto)
+CreateHandler -> Factory : Build Lead entities
+Factory --> CreateHandler : Lead[]
+CreateHandler -> CreateService : createLeads(Lead[])
+CreateService -> LeadRepo : add() + flush()
+LeadRepo --> CreateService : persisted leads
+CreateService --> CreateHandler : created leads
+CreateHandler -> Transformer : transformCollection($leads)
+Transformer --> CreateHandler : transformed data
+CreateHandler --> Controller : ApiResponse(201 Created)
+Controller --> Client : JSON Response (created leads)
 
-Controller -> Controller: Validate\nCreateLeadRequest DTO
+== GET /api/v1/leads?include=contacts ==
 
-Controller -> Service: CreateLeadService.create(title, contactId)
-activate Service
-
-Service -> Service: Check contact exists
-Service -> Entity: new Lead(title, contactId)
-activate Entity
-Entity --> Service: Lead instance
-deactivate Entity
-
-Service -> Repo: save(lead)
-activate Repo
-Repo -> DB: INSERT INTO leads
-DB --> Repo:
-deactivate Repo
-
-Service -> Service: Dispatch\nLeadCreatedEvent
-Service --> Controller: Lead entity
-deactivate Service
-
-Controller -> Trans: LeadTransformer.transform(lead)
-activate Trans
-Trans --> Controller: LeadResponse DTO
-deactivate Trans
-
-Controller --> Client: 201 Created\n{"id": 123, "title": "..."}
-deactivate Controller
-
-== GET /api/v1/leads ==
-Client -> Controller: GET /api/v1/leads
-activate Controller
-
-Controller -> RateLimit: Check rate limit
-RateLimit --> Controller: OK
-
-Controller -> Service: LeadQueryService.findAll()
-activate Service
-
-Service -> Repo: findAll()
-activate Repo
-Repo -> DB: SELECT * FROM leads
-DB --> Repo: Lead entities
-Repo --> Service: Lead entities
-deactivate Repo
-
-Service -> Service: For each lead,\nload contact by ID
-Service --> Controller: [Lead] entities
-deactivate Service
-
-Controller -> Trans: transform collection
-activate Trans
-Trans --> Controller: [LeadResponse] DTOs
-deactivate Trans
-
-Controller --> Client: 200 OK\n[{"id": 123, ...}]
-deactivate Controller
+Client -> Controller : GET /api/v1/leads?include=contacts
+Controller -> GetHandler : getList(GetLeadQueryDto)
+GetHandler -> GetService : getLeadsByAccount(LeadSearchCriteria)
+GetService -> LeadRepo : findByAccountId($criteria)\n(with joins if `with` includes contacts)
+LeadRepo --> GetService : list of leads\n(+ contacts if joined)
+GetService --> GetHandler : leads (with contacts loaded)
+GetHandler -> Transformer : transformCollection($leads, $criteria->getWith())
+Transformer --> GetHandler : transformed DTOs
+GetHandler --> Controller : ApiResponse(200 OK)
+Controller --> Client : JSON Response (leads with contacts)
 
 @enduml

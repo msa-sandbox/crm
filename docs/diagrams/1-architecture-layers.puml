@@ -1,62 +1,51 @@
-@startuml Architecture Layers
-!theme plain
-skinparam packageStyle rectangle
-skinparam linetype ortho
+@startuml
+title CRM Service - Architecture Layers
 
-package "Presentation Layer" as presentation #E8F5E9 {
-  [API v1\nControllers] as v1
-  [API v2\nControllers] as v2
-  [CLI Commands] as cli
+!define RECTANGLE class
+skinparam class {
+    BackgroundColor #f9f9f9
+    BorderColor #888
+    ArrowColor #555
 }
 
-package "Application Layer" as application #E3F2FD {
-  [Use Case\nServices] as services
-  [DTOs] as dto
-  [Transformers] as transformers
-}
+RECTANGLE "Presentation Layer\n(API V1, Controllers, Handlers,\nDTOs, Transformers)" as Presentation
 
-package "Domain Layer" as domain #FFF9C4 {
-  package "CRM" {
-    [Lead Domain] as lead
-    [Contact Domain] as contact
-    [Deal Domain] as deal
-  }
-}
+RECTANGLE "Application / Domain Layer\n(CRM: Leads, Contacts,\nEntities, Value Objects,\nDomain Services, Repositories)" as Domain
 
-package "Infrastructure Layer" as infrastructure #FFEBEE {
-  [Doctrine ORM] as doctrine
-  [Kafka Consumer] as kafka
-  [Redis Cache] as redis
-  [Auth Service\nClient] as auth
-}
+RECTANGLE "Infrastructure Layer\n(Security, Service, Doctrine, Redis, Kafka)" as Infrastructure
 
-v1 -down-> services
-v2 -down-> services
-cli -down-> services
+RECTANGLE "External Services\n(Auth Service, Kafka Broker, MySQL, Redis)" as External
 
-services -down-> lead
-services -down-> contact
-services -down-> deal
+Presentation -down-> Domain : uses
+Domain -down-> Infrastructure : uses
+Infrastructure -down-> External : integrates with
 
-services --> transformers
-transformers --> dto
-
-lead -down-> doctrine
-contact -down-> doctrine
-deal -down-> doctrine
-
-services -down-> kafka
-services -down-> redis
-services -down-> auth
-
-note right of domain
-  Pure business logic
-  No framework dependencies
+note right of Presentation
+- Controllers route HTTP requests
+- Handlers orchestrate use cases
+- DTOs define API contracts
+- Transformers shape responses
 end note
 
-note right of infrastructure
-  External integrations
-  Database, Cache, Events
+note right of Domain
+- Contains business logic
+- Defines entities, value objects
+- Services encapsulate use cases
+- Repositories abstract persistence
+end note
+
+note right of Infrastructure
+- Doctrine for ORM
+- Redis for cache and rate limit
+- Kafka for async communication
+- JWT Auth via external Auth Service
+end note
+
+note right of External
+- Auth Service issues JWT tokens
+- Kafka sends token invalidation events
+- Redis stores invalidation timestamps
+- MySQL persists CRM data
 end note
 
 @enduml

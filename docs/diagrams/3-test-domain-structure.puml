@@ -1,0 +1,113 @@
+@startuml
+title Domain Structure - CRM Service
+!pragma layout smetana
+!theme plain
+
+package "Lead Context" {
+    class Lead {
+        +id: int
+        +title: string
+        +status: LeadStatusEnum
+        +pipelineStage: string
+        +isDeleted: bool
+        +contacts: Collection<Contact>
+    }
+
+    class LeadStatusEnum
+
+    class LeadSearchCriteria {
+        +accountId: int
+        +limit: int
+        +afterId: ?int
+        +includeDeleted: bool
+        +search: ?string
+        +with: array
+    }
+
+    interface LeadRepositoryInterface {
+        +add(Lead)
+        +findByAccountId(LeadSearchCriteria): Lead[]
+    }
+
+    class LeadRepository implements LeadRepositoryInterface
+
+    class CreateLeadService {
+        +createLeads(Lead[]): Lead[]
+    }
+
+    class GetLeadService {
+        +getLeadsByAccount(LeadSearchCriteria): Lead[]
+    }
+
+    CreateLeadService --> LeadRepositoryInterface
+    GetLeadService --> LeadRepositoryInterface
+    LeadRepositoryInterface --> LeadSearchCriteria
+}
+
+package "Contact Context" {
+    class Contact {
+        +id: int
+        +firstName: string
+        +lastName: string
+        +email: string
+        +phone: ?string
+        +company: ?string
+        +isDeleted: bool
+    }
+
+    class ContactSearchCriteria {
+        +accountId: int
+        +limit: int
+        +afterId: ?int
+        +includeDeleted: bool
+        +search: ?string
+        +with: array
+    }
+
+    interface ContactRepositoryInterface {
+        +add(Contact)
+        +findByAccountId(ContactSearchCriteria): Contact[]
+    }
+
+    class ContactRepository implements ContactRepositoryInterface
+
+    class CreateContactService {
+        +createContacts(Contact[]): Contact[]
+    }
+
+    class GetContactService {
+        +getContactsByAccount(ContactSearchCriteria): Contact[]
+    }
+
+    CreateContactService --> ContactRepositoryInterface
+    GetContactService --> ContactRepositoryInterface
+    ContactRepositoryInterface --> ContactSearchCriteria
+}
+
+package "Application Layer (API)" {
+    class CreateLeadHandler {
+        +createBulk(CreateLeadCollectionDto)
+    }
+
+    class GetLeadHandler {
+        +getList(GetLeadQueryDto)
+    }
+
+    class CreateContactHandler {
+        +createBulk(CreateContactCollectionDto)
+    }
+
+    class GetContactHandler {
+        +getList(GetContactQueryDto)
+    }
+
+    CreateLeadHandler --> CreateLeadService
+    GetLeadHandler --> GetLeadService
+    CreateContactHandler --> CreateContactService
+    GetContactHandler --> GetContactService
+}
+
+' Cross-context relation (Lead ↔ Contact)
+Lead --> Contact : many-to-many
+
+@enduml
