@@ -13,3 +13,4 @@ parameters:
     - src
   ignoreErrors:
     - '#Instanceof between Throwable and InvalidArgumentException will always evaluate to false#'
+    - '#but interface Symfony\\Component\\Serializer\\Normalizer\\DenormalizerInterface is not generic#'

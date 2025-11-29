@@ -43,7 +43,7 @@ class DtoCollectionDenormalizer implements DenormalizerInterface, DenormalizerAw
     use DenormalizerAwareTrait;
 
     /**
-     * @template T of Object
+     * @template T of DtoCollectionInterface
      *
      * @param mixed $data
      * @param class-string<T> $type

@@ -5,19 +5,62 @@ declare(strict_types=1);
 namespace App\Api\V1\Transformer;
 
 use App\CRM\Contact\Entity\Contact;
+use App\CRM\Contact\Enum\IncludesEnum;
 
-class ContactTransformer
+readonly class ContactTransformer
 {
+    public function __construct(
+        private ContactCoreTransformer $contactCoreTransformer,
+        private LeadCoreTransformer $leadCoreTransformer,
+    ) {
+    }
+
     /**
-     * For requests like POST /contacts.
-     * In this case we need to return only new (or found) contact IDs.
+     * GET /contacts -- get all contacts.
+     * Response must be paginated, so we have to return an array with meta.
      *
-     * @param Contact[] $data
+     * @param array $contacts
+     * @param int $limit
+     * @param array $with
      *
      * @return array
      */
-    public function transformCreateContacts(array $data): array
+    public function transformCollection(array $contacts, int $limit, array $with = []): array
     {
-        return array_map(fn (Contact $contact) => ['id' => $contact->getId()], $data);
+        $items = array_map(
+            fn (Contact $contact) => $this->transform($contact, $with),
+            $contacts
+        );
+
+        $nextAfterId = !empty($contacts)
+            ? end($contacts)->getId()
+            : null;
+
+        return [
+            '_meta' => [
+                'limit' => $limit,
+                'next_after_id' => $nextAfterId,
+            ],
+            'contacts' => $items,
+        ];
+    }
+
+    /**
+     * @param Contact $contact
+     * @param array $with
+     *
+     * @return array
+     */
+    public function transform(Contact $contact, array $with = []): array
+    {
+        $data = $this->contactCoreTransformer->transform($contact);
+
+        if (in_array(IncludesEnum::LEADS->value, $with, true)) {
+            $data['_embedded'][IncludesEnum::LEADS->value] = $this->leadCoreTransformer->transformCollection(
+                $contact->getLeads()->toArray()
+            );
+        }
+
+        return $data;
     }
 }

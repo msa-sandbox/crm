@@ -5,52 +5,62 @@ declare(strict_types=1);
 namespace App\Api\V1\Transformer;
 
 use App\CRM\Lead\Entity\Lead;
+use App\CRM\Lead\Enum\IncludesEnum;
 
-class LeadTransformer
+readonly class LeadTransformer
 {
-    public function __construct()
-    {
+    public function __construct(
+        private LeadCoreTransformer $leadCoreTransformer,
+        private ContactCoreTransformer $contactCoreTransformer,
+    ) {
     }
 
     /**
-     * For requests like POST /leads.
-     * In this case we need to return only new lead IDs.
+     * GET /leads -- get all leads.
+     * Response must be paginated, so we have to return an array with meta.
      *
-     * @param Lead[] $data
+     * @param array $leads
+     * @param int $limit
+     * @param array $with
      *
      * @return array
      */
-    public function transformCreateLeads(array $data): array
+    public function transformCollection(array $leads, int $limit, array $with = []): array
     {
-        return array_map(fn (Lead $lead) => ['id' => $lead->getId()], $data);
+        $items = array_map(
+            fn (Lead $lead) => $this->transform($lead, $with),
+            $leads
+        );
+
+        $nextAfterId = !empty($leads)
+            ? end($leads)->getId()
+            : null;
+
+        return [
+            '_meta' => [
+                'limit' => $limit,
+                'next_after_id' => $nextAfterId,
+            ],
+            'leads' => $items,
+        ];
     }
 
     /**
-     * For requests to POST /leads/complex.
-     *
-     * @param array $data
+     * @param Lead $lead
+     * @param array $with
      *
      * @return array
-     * [
-     *  {
-     *    "id": 89,
-     *    "contacts": [
-     *      { "id": 20 },
-     *      { "id": 21 }
-     *    ]
-     *  }
-     * ]
      */
-    public function transformCreateLeadsWithContacts(array $data): array
+    public function transform(Lead $lead, array $with = []): array
     {
-        return array_map(function (Lead $lead) {
-            return [
-                'id' => $lead->getId(),
-                'contacts' => array_map(
-                    fn ($contact) => ['id' => $contact->getId()],
-                    $lead->getContacts()->toArray()
-                ),
-            ];
-        }, $data);
+        $data = $this->leadCoreTransformer->transform($lead);
+
+        if (in_array(IncludesEnum::CONTACTS->value, $with, true)) {
+            $data['_embedded'][IncludesEnum::CONTACTS->value] = $this->contactCoreTransformer->transformCollection(
+                $lead->getContacts()->toArray()
+            );
+        }
+
+        return $data;
     }
 }

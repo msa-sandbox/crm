@@ -7,7 +7,7 @@ namespace App\Api\V1\Handler\Lead;
 use App\Api\V1\Dto\Request\Lead\CreateLeadCollectionDto;
 use App\Api\V1\Dto\Request\Lead\CreateLeadWithContactCollectionDto;
 use App\Api\V1\Factory\LeadFactory;
-use App\Api\V1\Transformer\LeadTransformer;
+use App\Api\V1\Transformer\LeadCoreTransformer;
 use App\CRM\Contact\Contract\CreateContactInterface;
 use App\CRM\Lead\Contract\CreateLeadInterface;
 use App\Security\Enum\PermissionActionEnum;
@@ -27,7 +27,7 @@ readonly class CreateLeadHandler
         private TransactionManager $transactionManager,
         private CreateLeadInterface $createLead,
         private CreateContactInterface $createContact,
-        private LeadTransformer $leadTransformer,
+        private LeadCoreTransformer $leadTransformer,
     ) {
     }
 

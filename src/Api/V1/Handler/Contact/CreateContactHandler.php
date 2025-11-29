@@ -6,7 +6,7 @@ namespace App\Api\V1\Handler\Contact;
 
 use App\Api\V1\Dto\Request\Contact\CreateContactCollection;
 use App\Api\V1\Factory\ContactFactory;
-use App\Api\V1\Transformer\ContactTransformer;
+use App\Api\V1\Transformer\ContactCoreTransformer;
 use App\CRM\Contact\Contract\CreateContactInterface;
 use App\Security\Enum\PermissionActionEnum;
 use App\Security\Enum\PermissionEntityEnum;
@@ -25,7 +25,7 @@ readonly class CreateContactHandler
         private ContactFactory $contactFactory,
         private TransactionManager $transactionManager,
         private CreateContactInterface $createContact,
-        private ContactTransformer $contactTransformer,
+        private ContactCoreTransformer $contactTransformer,
     ) {
     }
 

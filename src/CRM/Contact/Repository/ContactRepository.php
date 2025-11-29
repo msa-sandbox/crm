@@ -6,6 +6,8 @@ namespace App\CRM\Contact\Repository;
 
 use App\CRM\Contact\Contract\ContactRepositoryInterface;
 use App\CRM\Contact\Entity\Contact;
+use App\CRM\Contact\Enum\IncludesEnum;
+use App\CRM\Contact\ValueObject\ContactSearchCriteria;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -65,5 +67,65 @@ class ContactRepository extends ServiceEntityRepository implements ContactReposi
         }
 
         return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function findByAccountId(ContactSearchCriteria $criteria): array
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->where('c.accountId = :accountId')
+            ->setParameter('accountId', $criteria->getAccountId());
+
+        if ($criteria->getAfterId()) {
+            $qb->andWhere('c.id > :afterId')
+                ->setParameter('afterId', $criteria->getAfterId());
+        }
+
+        if (!$criteria->includeDeleted()) {
+            $qb->andWhere('c.isDeleted = false');
+        }
+
+        if ($criteria->getSearch()) {
+            $qb->andWhere('
+                LOWER(c.firstName) LIKE :search
+                OR LOWER(c.lastName) LIKE :search
+                OR LOWER(c.email) LIKE :search
+                OR LOWER(c.company) LIKE :search
+            ')
+                ->setParameter('search', '%'.mb_strtolower($criteria->getSearch()).'%');
+        }
+
+        foreach ($criteria->getIncludes() as $include) {
+            match ($include) {
+                IncludesEnum::LEADS->value => $qb->leftJoin('c.leads', 'l')->addSelect('l'),
+                default => null,
+            };
+        }
+
+        return $qb
+            ->orderBy('c.id', 'ASC')
+            ->setMaxResults($criteria->getLimit())
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function findOneById(int $id, int $accountId, bool $withLeads = false): ?Contact
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->where('c.id = :id')
+            ->andWhere('c.accountId = :accountId')
+            ->setParameter('id', $id)
+            ->setParameter('accountId', $accountId);
+
+        if ($withLeads) {
+            $qb->leftJoin('c.leads', 'l')->addSelect('l');
+        }
+
+        return $qb->getQuery()->getOneOrNullResult();
     }
 }
