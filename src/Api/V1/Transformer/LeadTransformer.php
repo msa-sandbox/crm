@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Api\V1\Transformer;
 
 use App\CRM\Lead\Entity\Lead;
-use App\CRM\Lead\Enum\IncludesEnum;
+use App\CRM\Lead\Enum\RelationsEnum;
 
 readonly class LeadTransformer
 {
@@ -55,8 +55,8 @@ readonly class LeadTransformer
     {
         $data = $this->leadCoreTransformer->transform($lead);
 
-        if (in_array(IncludesEnum::CONTACTS->value, $with, true)) {
-            $data['_embedded'][IncludesEnum::CONTACTS->value] = $this->contactCoreTransformer->transformCollection(
+        if (in_array(RelationsEnum::CONTACTS->value, $with, true)) {
+            $data['_embedded'][RelationsEnum::CONTACTS->value] = $this->contactCoreTransformer->transformCollection(
                 $lead->getContacts()->toArray()
             );
         }

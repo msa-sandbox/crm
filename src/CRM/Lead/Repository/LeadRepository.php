@@ -6,6 +6,8 @@ namespace App\CRM\Lead\Repository;
 
 use App\CRM\Lead\Contract\LeadRepositoryInterface;
 use App\CRM\Lead\Entity\Lead;
+use App\CRM\Lead\Enum\RelationsEnum;
+use App\CRM\Lead\ValueObject\LeadSearchCriteria;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -50,18 +52,60 @@ class LeadRepository extends ServiceEntityRepository implements LeadRepositoryIn
      *
      * @return Lead[]
      */
-    public function findByAccountId(int $accountId, bool $includeDeleted = false): array
+    public function findByAccountId(LeadSearchCriteria $criteria): array
     {
         $qb = $this->createQueryBuilder('l')
-            ->where('l.account_id = :accountId')
-            ->setParameter('accountId', $accountId)
-            ->orderBy('l.created_at', 'DESC');
+            ->where('l.accountId = :accountId')
+            ->setParameter('accountId', $criteria->getAccountId());
 
-        if (!$includeDeleted) {
-            $qb->andWhere('l.is_deleted = :deleted')
-                ->setParameter('deleted', false);
+        if ($criteria->getAfterId()) {
+            $qb->andWhere('l.id > :afterId')
+                ->setParameter('afterId', $criteria->getAfterId());
         }
 
-        return $qb->getQuery()->getResult();
+        if (!$criteria->includeDeleted()) {
+            $qb->andWhere('l.isDeleted = false');
+        }
+
+        if ($criteria->getSearch()) {
+            $qb->andWhere('
+                LOWER(l.firstName) LIKE :search
+                OR LOWER(l.lastName) LIKE :search
+                OR LOWER(l.email) LIKE :search
+                OR LOWER(l.company) LIKE :search
+            ')
+                ->setParameter('search', '%'.mb_strtolower($criteria->getSearch()).'%');
+        }
+
+        foreach ($criteria->getWith() as $with) {
+            match ($with) {
+                RelationsEnum::CONTACTS->value => $qb->leftJoin('l.contacts', 'c')->addSelect('c'),
+                default => null,
+            };
+        }
+
+        return $qb
+            ->orderBy('l.id', 'ASC')
+            ->setMaxResults($criteria->getLimit())
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function findOneById(int $id, int $accountId, bool $withContacts = false): ?Lead
+    {
+        $qb = $this->createQueryBuilder('l')
+            ->where('l.id = :id')
+            ->andWhere('l.accountId = :accountId')
+            ->setParameter('id', $id)
+            ->setParameter('accountId', $accountId);
+
+        if ($withContacts) {
+            $qb->leftJoin('l.contacts', 'c')->addSelect('c');
+        }
+
+        return $qb->getQuery()->getOneOrNullResult();
     }
 }

@@ -6,7 +6,7 @@ namespace App\CRM\Contact\Repository;
 
 use App\CRM\Contact\Contract\ContactRepositoryInterface;
 use App\CRM\Contact\Entity\Contact;
-use App\CRM\Contact\Enum\IncludesEnum;
+use App\CRM\Contact\Enum\RelationsEnum;
 use App\CRM\Contact\ValueObject\ContactSearchCriteria;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -97,9 +97,9 @@ class ContactRepository extends ServiceEntityRepository implements ContactReposi
                 ->setParameter('search', '%'.mb_strtolower($criteria->getSearch()).'%');
         }
 
-        foreach ($criteria->getIncludes() as $include) {
-            match ($include) {
-                IncludesEnum::LEADS->value => $qb->leftJoin('c.leads', 'l')->addSelect('l'),
+        foreach ($criteria->getWith() as $with) {
+            match ($with) {
+                RelationsEnum::LEADS->value => $qb->leftJoin('c.leads', 'l')->addSelect('l'),
                 default => null,
             };
         }

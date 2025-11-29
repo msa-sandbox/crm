@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Api\V1\Dto\Request\Contact;
+namespace App\Api\V1\Dto\Request\Lead;
 
-use App\CRM\Contact\Enum\RelationsEnum;
+use App\CRM\Lead\Enum\RelationsEnum;
 use Symfony\Component\Validator\Constraints as Assert;
 
-readonly class GetContactItemQueryDto
+readonly class GetLeadItemQueryDto
 {
     public function __construct(
         #[Assert\Type('string')]

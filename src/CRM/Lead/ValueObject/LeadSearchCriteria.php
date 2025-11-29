@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\CRM\Contact\ValueObject;
+namespace App\CRM\Lead\ValueObject;
 
-readonly class ContactSearchCriteria
+readonly class LeadSearchCriteria
 {
     public function __construct(
         private int $accountId,

@@ -8,6 +8,7 @@ use App\Api\V1\Dto\Request\Contact\GetContactItemQueryDto;
 use App\Api\V1\Dto\Request\Contact\GetContactQueryDto;
 use App\Api\V1\Transformer\ContactTransformer;
 use App\CRM\Contact\Contract\GetContactInterface;
+use App\CRM\Contact\Enum\RelationsEnum;
 use App\CRM\Contact\ValueObject\ContactSearchCriteria;
 use App\Security\Enum\PermissionActionEnum;
 use App\Security\Enum\PermissionEntityEnum;
@@ -36,7 +37,14 @@ readonly class GetContactHandler
         /** @var User $user */
         $user = $this->security->getUser();
 
+        // Check permissions
         $this->permissionChecker->assertGranted($user, PermissionEntityEnum::CONTACT, PermissionActionEnum::READ);
+        foreach ($queryDto->getWith() as $with) {
+            match ($with) {
+                RelationsEnum::LEADS->value => $this->permissionChecker->assertGranted($user, PermissionEntityEnum::LEAD, PermissionActionEnum::READ),
+                default => null,
+            };
+        }
 
         $criteria = new ContactSearchCriteria(
             accountId: $user->getAccountId(),
@@ -44,12 +52,12 @@ readonly class GetContactHandler
             afterId: $queryDto->getAfterId(),
             search: $queryDto->getSearch(),
             includeDeleted: $queryDto->includeDeleted(),
-            includes: $queryDto->getIncludes(),
+            with: $queryDto->getWith(),
         );
 
         $contacts = $this->getContact->getContactsByAccount($criteria);
 
-        return $this->transformer->transformCollection($contacts, $queryDto->getLimit(), $queryDto->getIncludes());
+        return $this->transformer->transformCollection($contacts, $queryDto->getLimit(), $queryDto->getWith());
     }
 
     /**
@@ -68,13 +76,13 @@ readonly class GetContactHandler
         $contact = $this->getContact->getContactById(
             $id,
             $user->getAccountId(),
-            $queryDto->getIncludes(),
+            $queryDto->getWith(),
         );
 
         if (!$contact) {
             throw new NotFoundHttpException(sprintf('Contact %d not found', $id));
         }
 
-        return $this->transformer->transform($contact, $queryDto->getIncludes());
+        return $this->transformer->transform($contact, $queryDto->getWith());
     }
 }

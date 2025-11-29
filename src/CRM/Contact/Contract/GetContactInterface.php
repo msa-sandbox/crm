@@ -17,9 +17,9 @@ interface GetContactInterface
      *
      * @param int $id
      * @param int $accountId
-     * @param array $includes
+     * @param array $with
      *
      * @return Contact|null
      */
-    public function getContactById(int $id, int $accountId, array $includes): ?Contact;
+    public function getContactById(int $id, int $accountId, array $with): ?Contact;
 }

@@ -3,6 +3,7 @@
 namespace App\CRM\Lead\Contract;
 
 use App\CRM\Lead\Entity\Lead;
+use App\CRM\Lead\ValueObject\LeadSearchCriteria;
 use Doctrine\Persistence\ObjectRepository;
 
 interface LeadRepositoryInterface extends ObjectRepository
@@ -15,5 +16,14 @@ interface LeadRepositoryInterface extends ObjectRepository
 
     public function findActiveById(int $id): ?Lead;
 
-    public function findByAccountId(int $accountId, bool $includeDeleted = false): array;
+    public function findByAccountId(LeadSearchCriteria $criteria): array;
+
+    /**
+     * @param int $id
+     * @param int $accountId
+     * @param bool $withContacts
+     *
+     * @return Lead|null
+     */
+    public function findOneById(int $id, int $accountId, bool $withContacts): ?Lead;
 }
