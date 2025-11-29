@@ -2,74 +2,87 @@
 
 declare(strict_types=1);
 
-namespace App\Command;
+namespace App\Command\Api;
 
-use App\Api\V1\Dto\Request\Lead\CreateLeadCollectionDto;
 use App\Api\V1\Dto\Request\Lead\CreateLeadWithContactCollectionDto;
+use App\Api\V1\Handler\Lead\CreateLeadHandler;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[AsCommand(
-    name: 'test',
-    description: '',
+    name: 'api:test:leads:create-with-contacts',
+    description: 'Test command to create leads with embedded contacts (POST /leads/complex)',
 )]
-class Test extends Command
+class TestLeadWithContactsCreateCommand extends Command
 {
+    use CliAuthTrait;
+
     public function __construct(
         private readonly SerializerInterface $serializer,
         private readonly ValidatorInterface $validator,
+        private readonly CreateLeadHandler $handler,
+        private readonly TokenStorageInterface $tokenStorage,
     ) {
         parent::__construct();
     }
 
+    protected function configure(): void
+    {
+        $this->addOption('sample', null, InputOption::VALUE_NONE, 'Use built-in example JSON payload');
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        //        $json = $this->lead();
-        //        $dto = $this->serializer->deserialize($json, CreateLeadCollectionDto::class, 'json');
+        $io = new SymfonyStyle($input, $output);
 
-        $json = $this->leadWithContact();
+        // Authorize CLI user
+        $this->authenticateCli($this->tokenStorage);
+
+        // Prepare JSON payload (always use built-in example)
+        $json = $this->sampleJson();
+
+        // Deserialize JSON -> DTO collection
         $dto = $this->serializer->deserialize($json, CreateLeadWithContactCollectionDto::class, 'json');
 
-        // Валидация
+        // Validate DTO
         $violations = $this->validator->validate($dto);
         if (count($violations) > 0) {
-            dd($violations);
+            $io->error('DTO validation failed');
+            foreach ($violations as $violation) {
+                $io->writeln(sprintf(
+                    '- %s: %s',
+                    $violation->getPropertyPath(),
+                    $violation->getMessage()
+                ));
+            }
+
+            return Command::FAILURE;
         }
 
-        dd($dto);
+        // Call handler (same logic as controller POST /leads/complex)
+        $result = $this->handler->createBulkWithContacts($dto);
+
+        // Show response data
+        dump($result);
+
+        $io->success('Leads with contacts created successfully');
+        return Command::SUCCESS;
     }
 
-    public function lead(): string
+    /**
+     * Example JSON payload for lead creation with embedded contacts.
+     * Matches format expected by CreateLeadWithContactCollectionDto.
+     */
+    private function sampleJson(): string
     {
-        $json = <<<JSON
-[
-  {
-    "title": "Website redesign project",
-    "status": "active",
-    "pipelineStage": "proposal",
-    "budget": "5000",
-    "description": "Lead interested in redesigning corporate website.",
-    "notes": "Has existing contract with competitor, may switch next month."
-  },
-  {
-    "title": "Mobile app for e-commerce",
-    "status": "active",
-    "budget": 15000.01,
-    "description": "Potential high-value customer for mobile app."
-  }
-]
-JSON;
-
-        return $json;
-    }
-
-    public function leadWithContact(): string
-    {
-        $json = <<<JSON
+        return <<<JSON
 [
   {
     "title": "Website redesign project",
@@ -125,7 +138,5 @@ JSON;
   }
 ]
 JSON;
-
-        return $json;
     }
 }

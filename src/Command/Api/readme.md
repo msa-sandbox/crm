@@ -19,10 +19,16 @@ Simulates **`GET /contacts`** request.
 * `--search=` – full-text search string
 * `--with=` – related entities, e.g. `leads`
 
-**Example:**
+---
 
-```bash
-php bin/console api:test:contacts:list --limit=10 --with=leads --search=john
+**All commands:**
+
+```
+  php bin/console api:test:contacts:item
+  php bin/console api:test:contacts:create
+  php bin/console api:test:leads:item
+  php bin/console api:test:leads:create
+  php bin/console api:test:leads:create-with-contacts
 ```
 
 ---

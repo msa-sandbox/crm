@@ -80,7 +80,7 @@ readonly class GetLeadHandler
         );
 
         if (!$lead) {
-            throw new NotFoundHttpException(sprintf('LEad %d not found', $id));
+            throw new NotFoundHttpException(sprintf('Lead %d not found', $id));
         }
 
         return $this->transformer->transform($lead, $queryDto->getWith());
