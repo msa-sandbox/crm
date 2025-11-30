@@ -1,0 +1,426 @@
+openapi: 3.0.0
+info:
+  title: CRM API
+  version: '1.0'
+  description: Static documentation for CRM contacts and leads
+
+servers:
+  - url: /api/v1
+
+tags:
+  - name: Contacts
+  - name: Leads
+
+components:
+  schemas:
+
+    ApiResponse:
+      type: object
+      required: [success, message, data, errors]
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Success
+        data:
+          nullable: true
+          description: Payload data (varies by endpoint)
+        errors:
+          nullable: true
+          type: array
+          items:
+            type: string
+
+    Meta:
+      type: object
+      properties:
+        limit:
+          type: integer
+          example: 20
+        next_after_id:
+          type: integer
+          nullable: true
+          example: 120
+
+    Contact:
+      type: object
+      properties:
+        id: { type: integer, example: 101 }
+        firstName: { type: string, example: John }
+        lastName: { type: string, example: Doe }
+        email: { type: string, nullable: true, example: john.doe@example.com }
+        phone: { type: string, nullable: true, example: '+1234567890' }
+        company: { type: string, nullable: true, example: Acme Corp }
+        city: { type: string, nullable: true, example: New York }
+        country: { type: string, nullable: true, example: USA }
+        notes: { type: string, nullable: true, example: Important client }
+        isDeleted: { type: boolean, example: false }
+        createdAt: { type: string, format: date-time, example: '2025-01-15 10:30:00' }
+        updatedAt: { type: string, format: date-time, example: '2025-01-20 14:45:00' }
+        _embedded:
+          type: object
+          properties:
+            leads:
+              type: array
+              items:
+                $ref: '#/components/schemas/Lead'
+
+    Lead:
+      type: object
+      properties:
+        id: { type: integer, example: 85 }
+        title: { type: string, example: Website redesign project }
+        status: { type: string, example: active }
+        pipelineStage: { type: string, example: proposal }
+        budget: { type: number, format: float, example: 5000 }
+        description: { type: string, nullable: true, example: 'Lead interested in redesigning website.' }
+        notes: { type: string, nullable: true, example: 'Has existing contract with competitor.' }
+        isDeleted: { type: boolean, example: false }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        _embedded:
+          type: object
+          properties:
+            contacts:
+              type: array
+              items:
+                $ref: '#/components/schemas/Contact'
+
+    ContactCollectionResponse:
+      type: object
+      properties:
+        _meta:
+          $ref: '#/components/schemas/Meta'
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Contact'
+
+    LeadCollectionResponse:
+      type: object
+      properties:
+        _meta:
+          $ref: '#/components/schemas/Meta'
+        leads:
+          type: array
+          items:
+            $ref: '#/components/schemas/Lead'
+
+  examples:
+
+    CreateContactRequestExample:
+      value:
+        contacts:
+          - firstName: John
+            lastName: Doe
+            email: john.doe@example.com
+            phone: "+1234567890"
+            company: Acme Corp
+            city: New York
+            country: USA
+            notes: Important client
+
+    CreateContactResponseExample:
+      value:
+        success: true
+        message: Success
+        data:
+          - id: 1
+          - id: 2
+        errors: null
+
+    ContactListResponseExample:
+      value:
+        success: true
+        message: Success
+        data:
+          _meta:
+            limit: 20
+            next_after_id: 120
+          contacts:
+            - id: 101
+              firstName: John
+              lastName: Doe
+              email: john.doe@example.com
+              phone: "+1234567890"
+              company: Acme Corp
+              city: New York
+              country: USA
+              notes: Important client
+              isDeleted: false
+              createdAt: "2025-01-15 10:30:00"
+              updatedAt: "2025-01-20 14:45:00"
+              _embedded:
+                leads:
+                  - id: 1
+                    title: "Website redesign"
+                    status: "active"
+                    pipelineStage: "proposal"
+                    budget: 5000
+                    createdAt: "2025-01-10 12:00:00"
+                    updatedAt: "2025-01-20 15:00:00"
+        errors: null
+
+    CreateLeadRequestExample:
+      value:
+        leads:
+          - title: "Website redesign"
+            status: "active"
+            pipelineStage: "proposal"
+            budget: 5000
+            description: "Corporate site redesign project"
+            notes: "High-priority client"
+
+    CreateLeadResponseExample:
+      value:
+        success: true
+        message: Success
+        data:
+          - id: 10
+          - id: 11
+        errors: null
+
+    CreateLeadComplexRequestExample:
+      value:
+        leads:
+          - title: "Website redesign"
+            status: "active"
+            pipelineStage: "proposal"
+            budget: 5000
+            _embedded:
+              contacts:
+                - firstName: Bob
+                  lastName: Smith
+                  email: bob.smith@example.com
+                  phone: "+442071838750"
+                  company: Techify Ltd
+                  city: London
+                  country: UK
+                  notes: null
+
+    CreateLeadComplexResponseExample:
+      value:
+        success: true
+        message: Success
+        data:
+          - id: 89
+            contacts:
+              - id: 20
+              - id: 21
+        errors: null
+
+    LeadListResponseExample:
+      value:
+        success: true
+        message: Success
+        data:
+          _meta:
+            limit: 20
+            next_after_id: 120
+          leads:
+            - id: 85
+              title: "Website redesign project"
+              status: "active"
+              pipelineStage: "proposal"
+              budget: 5000
+              description: "Lead interested in redesigning website."
+              notes: "Has existing contract with competitor."
+              isDeleted: false
+              createdAt: "2025-01-15 10:30:00"
+              updatedAt: "2025-01-20 14:45:00"
+              _embedded:
+                contacts:
+                  - id: 101
+                    firstName: John
+                    lastName: Doe
+                    email: john.doe@example.com
+        errors: null
+
+paths:
+
+  /contacts:
+    post:
+      tags: [Contacts]
+      summary: Create contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [contacts]
+              properties:
+                contacts:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Contact'
+            examples:
+              example1:
+                $ref: '#/components/examples/CreateContactRequestExample'
+      responses:
+        '200':
+          description: Contacts created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id: { type: integer }
+              examples:
+                example1:
+                  $ref: '#/components/examples/CreateContactResponseExample'
+
+    get:
+      tags: [Contacts]
+      summary: Get contacts list
+      parameters:
+        - name: afterId
+          in: query
+          schema: { type: integer, minimum: 0 }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - name: includeDeleted
+          in: query
+          schema: { type: boolean, default: false }
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: with
+          in: query
+          schema: { type: string, enum: [leads] }
+      responses:
+        '200':
+          description: Contacts list retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ContactCollectionResponse'
+              examples:
+                example1:
+                  $ref: '#/components/examples/ContactListResponseExample'
+
+  /leads:
+    post:
+      tags: [Leads]
+      summary: Create leads
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [leads]
+              properties:
+                leads:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Lead'
+            examples:
+              example1:
+                $ref: '#/components/examples/CreateLeadRequestExample'
+      responses:
+        '200':
+          description: Leads created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+              examples:
+                example1:
+                  $ref: '#/components/examples/CreateLeadResponseExample'
+
+    get:
+      tags: [Leads]
+      summary: Get leads list
+      parameters:
+        - name: afterId
+          in: query
+          schema: { type: integer, minimum: 0 }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - name: includeDeleted
+          in: query
+          schema: { type: boolean, default: false }
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: with
+          in: query
+          schema: { type: string, enum: [contacts] }
+      responses:
+        '200':
+          description: Leads list retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/LeadCollectionResponse'
+              examples:
+                example1:
+                  $ref: '#/components/examples/LeadListResponseExample'
+
+  /leads/complex:
+    post:
+      tags: [Leads]
+      summary: Create leads with embedded contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [leads]
+              properties:
+                leads:
+                  type: array
+                  items:
+                    type: object
+                    required: [title, status, budget, _embedded]
+                    properties:
+                      title: { type: string }
+                      status: { type: string }
+                      pipelineStage: { type: string }
+                      budget: { type: number }
+                      description: { type: string }
+                      notes: { type: string }
+                      _embedded:
+                        type: object
+                        required: [contacts]
+                        properties:
+                          contacts:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Contact'
+            examples:
+              example1:
+                $ref: '#/components/examples/CreateLeadComplexRequestExample'
+      responses:
+        '200':
+          description: Leads created with contacts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+              examples:
+                example1:
+                  $ref: '#/components/examples/CreateLeadComplexResponseExample'
