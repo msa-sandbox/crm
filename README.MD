@@ -167,10 +167,10 @@ The project includes a **comprehensive automated test suite** that verifies corr
 
 ### Test Types
 
-| Type                      | Scope                                         | Description                                                                                                                 |
-|---------------------------| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| **Unit Tests**            | Domain services, factories, and value objects | Validate isolated business logic and internal consistency.                                                                  |
-| **Integration Tests**     | Handlers, repositories, transactions          | Execute against a real **MySQL test database** (no mocks). Cover data persistence, permission checks, and entity relations. |
+| Type                  | Scope                                         | Description                                                                                                                 |
+|-----------------------|-----------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| **Unit Tests**        | Domain services, factories, and value objects | Validate isolated business logic and internal consistency.                                                                  |
+| **Integration Tests** | Handlers, repositories, transactions          | Execute against a real **MySQL test database** (no mocks). Cover data persistence, permission checks, and entity relations. |
 
 I do not have functional tests since they will repeat the same scenarios as integration tests.
 

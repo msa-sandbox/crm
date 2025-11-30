@@ -196,7 +196,7 @@ Request
 ## Technology Stack
 
 | Component          | Technology                        | Purpose                              |
-| ------------------ | --------------------------------- | ------------------------------------ |
+|--------------------|-----------------------------------|--------------------------------------|
 | **Framework**      | Symfony 7.3                       | Core framework                       |
 | **Language**       | PHP 8.3+                          | Application logic                    |
 | **ORM**            | Doctrine ORM 3.x                  | Data persistence                     |
