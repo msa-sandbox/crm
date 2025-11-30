@@ -115,6 +115,13 @@ class Lead
         $this->updatedAt = new DateTimeImmutable();
     }
 
+    public function setAsDeleted(): self
+    {
+        $this->isDeleted = true;
+
+        return $this;
+    }
+
     // Getters
     public function getId(): int
     {

@@ -73,6 +73,7 @@ class TestContactCreateCommand extends Command
         dump($result);
 
         $io->success('Contacts created successfully');
+
         return Command::SUCCESS;
     }
 

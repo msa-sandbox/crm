@@ -73,6 +73,7 @@ class TestLeadCreateCommand extends Command
         dump($result);
 
         $io->success('Leads created successfully');
+
         return Command::SUCCESS;
     }
 

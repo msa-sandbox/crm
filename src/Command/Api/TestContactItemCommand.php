@@ -47,8 +47,8 @@ class TestContactItemCommand extends Command
         // Authorize user
         $this->authenticateCli($this->tokenStorage);
 
-        $id             = (int) $input->getArgument('id');
-        $with           = $input->getOption('with');
+        $id = (int) $input->getArgument('id');
+        $with = $input->getOption('with');
         $includeDeleted = $input->getOption('include-deleted');
 
         // Make the same DTO as in controller

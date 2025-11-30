@@ -48,11 +48,11 @@ class TestContactsListCommand extends Command
         // Authorize user
         $this->authenticateCli($this->tokenStorage);
 
-        $afterId        = $input->getOption('after-id');
-        $limit          = $input->getOption('limit');
+        $afterId = $input->getOption('after-id');
+        $limit = $input->getOption('limit');
         $includeDeleted = $input->getOption('include-deleted');
-        $search         = $input->getOption('search');
-        $with           = $input->getOption('with');
+        $search = $input->getOption('search');
+        $with = $input->getOption('with');
 
         // Make the same DTO as in controller
         $dto = new GetContactQueryDto(

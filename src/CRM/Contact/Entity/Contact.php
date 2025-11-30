@@ -258,4 +258,33 @@ class Contact
     {
         return $this->leads->map(fn (Lead $lead) => $lead->getId())->toArray();
     }
+
+    // Lead management methods
+    public function addLead(Lead $lead): self
+    {
+        if (!$this->leads->contains($lead)) {
+            $this->leads->add($lead);
+        }
+
+        return $this;
+    }
+
+    public function removeLead(Lead $lead): self
+    {
+        $this->leads->removeElement($lead);
+
+        return $this;
+    }
+
+    public function hasLead(Lead $lead): bool
+    {
+        return $this->leads->contains($lead);
+    }
+
+    public function clearLeads(): self
+    {
+        $this->leads->clear();
+
+        return $this;
+    }
 }

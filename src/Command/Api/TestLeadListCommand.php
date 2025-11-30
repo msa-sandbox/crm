@@ -49,11 +49,11 @@ class TestLeadListCommand extends Command
         $this->authenticateCli($this->tokenStorage);
 
         // Collect parameters
-        $afterId        = $input->getOption('after-id');
-        $limit          = $input->getOption('limit');
+        $afterId = $input->getOption('after-id');
+        $limit = $input->getOption('limit');
         $includeDeleted = $input->getOption('include-deleted');
-        $search         = $input->getOption('search');
-        $with           = $input->getOption('with');
+        $search = $input->getOption('search');
+        $with = $input->getOption('with');
 
         // Build DTO
         $dto = new GetLeadQueryDto(

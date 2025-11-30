@@ -73,6 +73,7 @@ class TestLeadWithContactsCreateCommand extends Command
         dump($result);
 
         $io->success('Leads with contacts created successfully');
+
         return Command::SUCCESS;
     }
 

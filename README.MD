@@ -161,6 +161,42 @@ Environment variables are defined in `.env` and include default values for:
 
 ---
 
+## Testing
+
+The project includes a **comprehensive automated test suite** that verifies correctness across all major layers.
+
+### Test Types
+
+| Type                      | Scope                                         | Description                                                                                                                 |
+|---------------------------| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Unit Tests**            | Domain services, factories, and value objects | Validate isolated business logic and internal consistency.                                                                  |
+| **Integration Tests**     | Handlers, repositories, transactions          | Execute against a real **MySQL test database** (no mocks). Cover data persistence, permission checks, and entity relations. |
+
+I do not have functional tests since they will repeat the same scenarios as integration tests.
+
+All tests run in the **`test` environment**, with a clean schema automatically created before execution via Doctrine’s `SchemaTool`. A fake authenticated user is injected for permission validation.
+
+### Key Highlights
+
+* Real DB interactions, no mocks
+* Automatic DB cleanup for isolation
+* Transactional rollback and consistency checks
+* Coverage for pagination, search, and relation logic
+* PHPUnit 11.x + strict assertions
+
+### Running Tests
+
+You can run the full test suite via Composer:
+
+```bash
+  composer unit
+```
+
+> The integration tests closely simulate real API usage — each scenario mirrors actual system behavior (create, query, relate entities) to ensure end-to-end data flow validation.
+
+
+---
+
 ## Documentation
 
 All extended documentation and diagrams are available in the [`/docs`](docs/) directory
