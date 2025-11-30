@@ -46,7 +46,7 @@ readonly class RequestCheckUserPermissionListener
             return;
         }
 
-        $value = $this->authCache->get("invalidated_{$user->getId()}");
+        $value = $this->authCache->get("invalidated_user_{$user->getId()}");
 
         // If there is no data about changed permissions -- just pass
         if (!$value) {

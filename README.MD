@@ -99,7 +99,7 @@ CreateLeadHandler::createBulk(CreateLeadCollectionDto)
 Controller → JSON Response (200 OK)
 ```
 
-### GET /api/v1/leads?status=new&include=contacts
+### GET /api/v1/leads?with=contacts
 
 ```
 HTTP Request (query params)
