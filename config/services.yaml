@@ -26,9 +26,10 @@ services:
     public: true
 
   # PSR-16 cache wrappers for our custom cache pools
+  App\Infrastructure\Redis\AuthCache:
+    arguments:
+      $redisDsn: '%env(REDIS_URL)%'
   App\Cache\AppCache:
-    class: Symfony\Component\Cache\Psr16Cache
-  App\Cache\AuthCache:
     class: Symfony\Component\Cache\Psr16Cache
 
 
@@ -37,15 +38,10 @@ services:
     public: true
     arguments:
       $brokers: '%env(KAFKA_BROKERS)%'
-#  App\Infrastructure\Kafka\KafkaProducer:
-#    arguments:
-#      $brokers: '%env(KAFKA_BROKERS)%'
-#      $topicName: '%env(KAFKA_TOPIC)%'
-#  App\Command\KafkaConsumeCommand:
-#    arguments:
-#      $brokers: '%env(KAFKA_BROKERS)%'
-#      $topicName: '%env(KAFKA_TOPIC)%'
-#    tags: [ 'console.command' ]
+  App\Command\KafkaConsumeAuthCommand:
+    arguments:
+      $brokers: '%env(KAFKA_BROKERS)%'
+      $topicName: '%env(KAFKA_TOPIC)%'
 
   # Exception Formatter
   App\Helper\ExceptionFormatter:

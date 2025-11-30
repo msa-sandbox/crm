@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api\V1\EventListener\Middleware;
 
+use App\Infrastructure\Redis\AuthCache;
 use App\Security\User;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -11,6 +12,7 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 /**
@@ -24,7 +26,7 @@ readonly class RequestCheckUserPermissionListener
 {
     public function __construct(
         private Security $security,
-        #[Autowire(service: 'App\Cache\AuthCache')]
+        #[Autowire(service: AuthCache::class)]
         private CacheInterface $authCache,
     ) {
     }
@@ -53,8 +55,9 @@ readonly class RequestCheckUserPermissionListener
             return;
         }
 
-        if ($value <= time()) {
-            throw new UnauthorizedHttpException('Token has been invalidated, please refresh');
+        // If the token was issued before the invalidation date -- throw an exception
+        if ($user->getTokenIssuedAt() <= (int) $value) {
+            throw new HttpException(401, 'Token has been invalidated, please refresh');
         }
     }
 }
